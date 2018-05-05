@@ -113,33 +113,6 @@ release: env_release_check build release-clean release_base release_ports_dir $(
 	@$(ECHO) .PS2SDK Installed.;
 	@$(ECHO) .;
 
-# install-headers rules
-install-headers: libc_dirs
-	$(MAKE) -C ee/libc release-libc-include
-	$(MAKE) -C ee/fdlibm release-libm-include
-	$(MAKE) -C ee/startup all
-	$(MAKE) -C ee/startup release
-	@$(ECHO) .;
-	@$(ECHO) PS2SDK LIBC headers installed.;
-	@$(ECHO) .;
-
-# libc rules
-libc_dirs: release_base
-	$(MAKE) -C ee/libc release-libc-dirs
-
-libc-clean: env_build_check
-	$(MAKE) -C ee/startup clean
-	$(MAKE) -C ee/libc clean
-	$(MAKE) -C ee/fdlibm clean
-
-libc: env_build_check
-	$(MAKE) -C ee/libc all
-	$(MAKE) -C ee/fdlibm all
-
-libc-install: libc_dirs libc
-	$(MAKE) -C ee/libc release
-	$(MAKE) -C ee/fdlibm release
-
 # Miscellaneous rules
 help:
 	@$(ECHO) "usage: make <options> <target>";
@@ -154,10 +127,6 @@ help:
 	@$(ECHO) "    clean             Clean source directory";
 	@$(ECHO) "    rebuild           Clean then build ps2sdk";
 	@$(ECHO) "    release-clean     Clean installed files";
-	@$(ECHO) "    install-headers   Install libc headers";
-	@$(ECHO) "    libc              Build libc and libm";
-	@$(ECHO) "    libc-clean        Clean libc and libm sources;"
-	@$(ECHO) "    libc-install      Install libc and libm";
 	@$(ECHO) "    help              Print this message";
 
 include Defs.make
