@@ -82,6 +82,8 @@
 	                        mass (usbhdfsd)
 	                        sd (iEEE1394_disk)
 	                        smb (smbman)
+	                        devfs (devfs)
+	                        host (depends on implementation)
 */
 
 #define IO_MC_IFMT		0x0030

@@ -167,14 +167,14 @@ int devfs_fill_dirent(io_dirent_t *dirent, int devno)
            memset(dirent, 0, sizeof(io_dirent_t));
            dirent->stat.size = dev_scan->subdevs[subdev_loop].extent.loc32[0];
            dirent->stat.hisize = dev_scan->subdevs[subdev_loop].extent.loc32[1];
-           dirent->stat.mode = IO_S_IFREG;
+           dirent->stat.mode = IO_MC_IFREG;
            if(dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_R)
            {
-              dirent->stat.mode |= IO_S_IRUSR;
+              dirent->stat.mode |= IO_MC_R;
            }
            if(dev_scan->subdevs[subdev_loop].mode & DEVFS_MODE_W)
            {
-              dirent->stat.mode |= IO_S_IWUSR;
+              dirent->stat.mode |= IO_MC_W;
            }
            dirent->name[0] = 0;
            strcpy(dirent->name, dev_scan->node.name);
@@ -983,14 +983,14 @@ int devfs_getstat(iop_file_t *file, const char *name, io_stat_t *stat)
 
       stat->size = dev->subdevs[subdev].extent.loc32[0];
       stat->hisize = dev->subdevs[subdev].extent.loc32[1];
-      stat->mode = IO_S_IFREG;
+      stat->mode = IO_MC_IFREG;
       if(dev->subdevs[subdev].mode & DEVFS_MODE_R)
       {
-         stat->mode |= IO_S_IRUSR;
+         stat->mode |= IO_MC_R;
       }
       if(dev->subdevs[subdev].mode & DEVFS_MODE_W)
       {
-         stat->mode |= IO_S_IWUSR;
+         stat->mode |= IO_MC_W;
       }
    }
 
