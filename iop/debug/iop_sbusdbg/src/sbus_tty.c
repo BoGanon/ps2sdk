@@ -97,13 +97,13 @@ static int ttyfs_remove(iop_file_t *file, const char *name) {
     return(-1);
 }
 
-static int ttyfs_dread(iop_file_t *file, iox_dirent_t *dirent) {
+static int ttyfs_dread(iop_file_t *file, io_dirent_t *dirent) {
     //DBG_puts("SIOTTY: FS Dread()\n");
 
     return(-1);
 }
 
-static int ttyfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat) {
+static int ttyfs_getstat(iop_file_t *file, const char *name, io_stat_t *stat) {
     //DBG_puts("SIOTTY: FS GetStat()\n");
 
     return(-1);

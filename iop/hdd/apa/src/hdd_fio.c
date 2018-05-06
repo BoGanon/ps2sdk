@@ -55,7 +55,7 @@ static int fioInputBreaker(char const **arg, char *outBuf, int maxout);
 static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode);
 static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot);
 static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
-static void fioGetStatFiller(apa_cache_t *clink1, iox_stat_t *stat);
+static void fioGetStatFiller(apa_cache_t *clink1, io_stat_t *stat);
 static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp);
 static int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot);
 static int devctlSwapTemp(s32 device, char *argp);
@@ -610,7 +610,7 @@ int hddLseek(iop_file_t *f, int post, int whence)
 	return rv;
 }
 
-static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
+static void fioGetStatFiller(apa_cache_t *clink, io_stat_t *stat)
 {
 	stat->mode=clink->header->type;
 	stat->attr=clink->header->flags;
@@ -634,7 +634,7 @@ static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 #endif
 }
 
-int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
+int hddGetStat(iop_file_t *f, const char *name, io_stat_t *stat)
 {
 	apa_cache_t	*clink;
 	apa_params_t	params;
@@ -658,7 +658,7 @@ int hddDopen(iop_file_t *f, const char *name)
     return hddOpen(f, name, 0, 0);
 }
 
-int hddDread(iop_file_t *f, iox_dirent_t *dirent)
+int hddDread(iop_file_t *f, io_dirent_t *dirent)
 {
 	int				rv;
 	hdd_file_slot_t *fileSlot=f->privdata;

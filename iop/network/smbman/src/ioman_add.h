@@ -28,9 +28,9 @@ typedef struct _iop_ext_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, iox_dirent_t *);
-	int	(*getstat)(iop_file_t *, const char *, iox_stat_t *);
-	int	(*chstat)(iop_file_t *, const char *, iox_stat_t *, unsigned int);
+	int	(*dread)(iop_file_t *, io_dirent_t *);
+	int	(*getstat)(iop_file_t *, const char *, io_stat_t *);
+	int	(*chstat)(iop_file_t *, const char *, io_stat_t *, unsigned int);
 	/* Extended ops start here.  */
 	int	(*rename)(iop_file_t *, const char *, const char *);
 	int	(*chdir)(iop_file_t *, const char *);

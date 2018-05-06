@@ -23,7 +23,9 @@
 #define __FILEXIO_H__
 
 #include <tamtypes.h>
+
 #include <sys/io_fcntl.h>
+#include <sys/io_mount.h>
 #include <sys/io_stat.h>
 
 #define FILEXIO_IRX	0xb0b0b00
@@ -71,10 +73,6 @@ typedef struct {
 	u8 sbuffer[64];
 	u8 ebuffer[64];
 } fxio_rests_pkt; // sizeof = 144
-
-#define FILEXIO_MOUNTFLAG_NORMAL	0
-#define FILEXIO_MOUNTFLAG_READONLY	1
-#define FILEXIO_MOUNTFLAG_ROBUST	2
 
 #define FILEXIO_DIRFLAGS_DIR	0xa0
 #define FILEXIO_DIRFLAGS_FILE	0x80
@@ -197,13 +195,13 @@ struct fxio_lseek64_packet {
 
 struct fxio_chstat_packet {
 	char pathname[512];
-	iox_stat_t *stat;
+	io_stat_t *stat;
 	int mask;
 };
 
 struct fxio_getstat_packet {
 	char pathname[512];
-	iox_stat_t *stat;
+	io_stat_t *stat;
 };
 
 struct fxio_format_packet {
@@ -220,7 +218,7 @@ struct fxio_sync_packet {
 
 struct fxio_dread_packet {
 	int fd;
-	iox_dirent_t *dirent;
+	io_dirent_t *dirent;
 };
 
 struct fxio_devctl_packet {

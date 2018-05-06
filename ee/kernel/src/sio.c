@@ -190,7 +190,7 @@ void sio_flush()
 #if defined(F_sio_printf) || defined(DOXYGEN)
 int __attribute__((weak)) vsnprintf(char *buf, size_t n, const char *fmt, va_list ap)
 {
-    sio_puts("FIXME: sio_printf (vsnprintf undefined)\n");
+    sio_puts("FIXME: sio_printf (vsnprintf undefined)");
     return -1;
 }
 

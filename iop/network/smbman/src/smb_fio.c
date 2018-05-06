@@ -620,7 +620,7 @@ static void FileTimeToDate(u64 FileTime, u8 *datetime)
 	datetime[7] = (u8)((years >> 8) & 0xFF);
 }
 
-static void smb_statFiller(const PathInformation_t *info, iox_stat_t *stat)
+static void smb_statFiller(const PathInformation_t *info, io_stat_t *stat)
 {
 	FileTimeToDate(info->Created, stat->ctime);
 	FileTimeToDate(info->LastAccess, stat->atime);
@@ -629,7 +629,7 @@ static void smb_statFiller(const PathInformation_t *info, iox_stat_t *stat)
 	stat->size = (int)(info->EndOfFile & 0xffffffff);
 	stat->hisize = (int)((info->EndOfFile >> 32) & 0xffffffff);
 
-	stat->mode = (info->FileAttributes & EXT_ATTR_DIRECTORY) ? FIO_S_IFDIR : FIO_S_IFREG;
+	stat->mode = (info->FileAttributes & EXT_ATTR_DIRECTORY) ? IO_MC_IFDIR : IO_MC_IFREG;
 }
 
 //--------------------------------------------------------------
@@ -691,7 +691,7 @@ int smb_dclose(iop_file_t *f)
 }
 
 //--------------------------------------------------------------
-int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
+int smb_dread(iop_file_t *f, io_dirent_t *dirent)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
 	int r;
@@ -701,7 +701,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 
 	smb_io_lock();
 
-	memset((void *)dirent, 0, sizeof(iox_dirent_t));
+	memset((void *)dirent, 0, sizeof(io_dirent_t));
 
 	SearchInfo_t *info = (SearchInfo_t *)SearchBuf;
 
@@ -734,7 +734,7 @@ io_unlock:
 }
 
 //--------------------------------------------------------------
-int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
+int smb_getstat(iop_file_t *f, const char *filename, io_stat_t *stat)
 {
 	int r;
 	PathInformation_t info;
@@ -749,7 +749,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 
 	smb_io_lock();
 
-	memset((void *)stat, 0, sizeof(iox_stat_t));
+	memset((void *)stat, 0, sizeof(io_stat_t));
 
 	r = smb_QueryPathInformation(UID, TID, &info, path);
 	if (r < 0) {

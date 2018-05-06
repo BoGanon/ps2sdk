@@ -800,6 +800,7 @@ int fioFormat(const char *name)
 /* The unistd glue functions.  */
 #if defined(F_fio_unistd) || defined(DOXYGEN)
 #include <limits.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <kernel/dirent.h>
 
@@ -830,38 +831,88 @@ off_t lseek(int fd, off_t offset, int whence)
 int stat(const char *path, struct stat *st)
 {
   long long high;
+  int mc = 0;
   int ret;
   io_stat_t f_st;
+  struct tm loctime;
 
   if ((ret = fioGetstat(path,&f_st)) < 0)
     return ret;
 
-  /* Type */
-  if (FIO_SO_ISLNK(f_st.mode))
-    st->st_mode = S_IFLNK;
-  if (FIO_SO_ISREG(f_st.mode))
-    st->st_mode = S_IFREG;
-  if (FIO_SO_ISDIR(f_st.mode))
-    st->st_mode = S_IFDIR;
+  if ((path[0] == 'm') && (path[1] == 'c'))
+    mc = 1;
+  if ((path[0] == 'm') && (path[1] == 'a')
+      && (path[2] == 's') && (path[3] == 's'))
+    mc = 1;
+  if ((path[0] == 's') && (path[1] == 'd'))
+    mc = 1;
+  if ((path[0] == 's') && (path[1] == 'm') && (path[2] == 'b'))
+    mc = 1;
 
-  /* Access */
-  if (f_st.mode & FIO_SO_IROTH)
-    st->st_mode = st->st_mode | S_IROTH;
-  if (f_st.mode & FIO_SO_IWOTH)
-    st->st_mode = st->st_mode | S_IWOTH;
-  if (f_st.mode & FIO_SO_IXOTH)
-    st->st_mode = st->st_mode | S_IXOTH;
+  /* Type */
+  if (mc)
+  {
+    if (IO_MC_ISDIR(f_st.mode))
+      st->st_mode = S_IFDIR;
+    if (IO_MC_ISREG(f_st.mode))
+      st->st_mode = S_IFREG;
+    if (f_st.mode & IO_MC_R)
+      st->st_mode = st->st_mode | IO_S_IRALL;
+    if (f_st.mode & IO_MC_W)
+      st->st_mode = st->st_mode | IO_S_IWALL;
+    if (f_st.mode & IO_MC_X)
+      st->st_mode = st->st_mode | IO_S_IXALL;
+  }
+  else
+  {
+    if (IO_S_ISLNK(f_st.mode))
+      st->st_mode = S_IFLNK;
+    if (IO_S_ISREG(f_st.mode))
+      st->st_mode = S_IFREG;
+    if (IO_S_ISDIR(f_st.mode))
+      st->st_mode = S_IFDIR;
+
+    /* Access */
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXU);
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXG);
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXO);
+  }
 
   /* Size */
   st->st_size = f_st.size;
 
-  /* I think hisize stores the upper 32-bits of a 64-bit size value */
   if (f_st.hisize) {
     high = f_st.hisize;
     st->st_size = st->st_size + (high << 32);
   }
 
-  /** @todo Add time functions to stat */
+  /* Time, ignores timezone. */
+  loctime.tm_year =  f_st.ctime[6];
+  loctime.tm_year += f_st.ctime[7]<<8;
+  loctime.tm_mon  =  f_st.ctime[5]-1;
+  loctime.tm_mday =  f_st.ctime[4]-1;
+  loctime.tm_hour =  f_st.ctime[3];
+  loctime.tm_min  =  f_st.ctime[2];
+  loctime.tm_sec  =  f_st.ctime[1];
+  st->st_ctime    = mktime(&loctime);
+
+  loctime.tm_year =  f_st.atime[6];
+  loctime.tm_year += f_st.atime[7]<<8;
+  loctime.tm_mon  =  f_st.atime[5]-1;
+  loctime.tm_mday =  f_st.atime[4]-1;
+  loctime.tm_hour =  f_st.atime[3];
+  loctime.tm_min  =  f_st.atime[2];
+  loctime.tm_sec  =  f_st.atime[1];
+  st->st_atime    = mktime(&loctime);
+
+  loctime.tm_year =  f_st.mtime[6];
+  loctime.tm_year += f_st.mtime[7]<<8;
+  loctime.tm_mon  =  f_st.mtime[5]-1;
+  loctime.tm_mday =  f_st.mtime[4]-1;
+  loctime.tm_hour =  f_st.mtime[3];
+  loctime.tm_min  =  f_st.mtime[2];
+  loctime.tm_sec  =  f_st.mtime[1];
+  st->st_mtime    = mktime(&loctime);
 
   return 0;
 }

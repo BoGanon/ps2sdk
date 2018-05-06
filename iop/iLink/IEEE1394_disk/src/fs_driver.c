@@ -77,14 +77,14 @@ static fs_rec fsRec[MAX_FILES]; //file info record
 
 static void fillStat(io_stat_t *stat, const fat_dir *fatdir)
 {
-	stat->mode = FIO_SO_IROTH | FIO_SO_IXOTH;
+	stat->mode = IO_MC_R | IO_MC_X;
 	if (fatdir->attr & FAT_ATTR_DIRECTORY) {
-		stat->mode |= FIO_SO_IFDIR;
+		stat->mode |= IO_MC_IFDIR;
 	} else {
-		stat->mode |= FIO_SO_IFREG;
+		stat->mode |= IO_MC_IFREG;
 	}
 	if (!(fatdir->attr & FAT_ATTR_READONLY)) {
-		stat->mode |= FIO_SO_IWOTH;
+		stat->mode |= IO_MC_W;
 	}
 
 	stat->size = fatdir->size;

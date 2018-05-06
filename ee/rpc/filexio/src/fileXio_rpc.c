@@ -20,6 +20,7 @@
 
 /* Needed for unistd glue functions */
 #include <sys/stat.h>
+#include <time.h>
 
 #include <limits.h>
 #include <errno.h>
@@ -648,7 +649,7 @@ s64 fileXioLseek64(int fd, s64 offset, int whence)
 	return(rv);
 }
 
-int fileXioChStat(const char *name, iox_stat_t *stat, int mask)
+int fileXioChStat(const char *name, io_stat_t *stat, int mask)
 {
 	int rv;
 	struct fxio_chstat_packet *packet=(struct fxio_chstat_packet*)sbuff;
@@ -664,7 +665,7 @@ int fileXioChStat(const char *name, iox_stat_t *stat, int mask)
 	packet->mask = mask;
 
 	if(!IS_UNCACHED_SEG(stat))
-		SifWriteBackDCache(stat, sizeof(iox_stat_t));
+		SifWriteBackDCache(stat, sizeof(io_stat_t));
 
 	if((rv = SifCallRpc(&cd0, FILEXIO_CHSTAT, fileXioBlockMode, sbuff, sizeof(struct fxio_chstat_packet), sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
@@ -678,7 +679,7 @@ int fileXioChStat(const char *name, iox_stat_t *stat, int mask)
 	return(rv);
 }
 
-int fileXioGetStat(const char *name, iox_stat_t *stat)
+int fileXioGetStat(const char *name, io_stat_t *stat)
 {
 	int rv;
 	struct fxio_getstat_packet *packet=(struct fxio_getstat_packet*)sbuff;
@@ -693,7 +694,7 @@ int fileXioGetStat(const char *name, iox_stat_t *stat)
 	packet->stat = stat;
 
 	if(!IS_UNCACHED_SEG(stat))
-		SifWriteBackDCache(stat, sizeof(iox_stat_t));
+		SifWriteBackDCache(stat, sizeof(io_stat_t));
 
 	if((rv = SifCallRpc(&cd0, FILEXIO_GETSTAT, fileXioBlockMode, sbuff, sizeof(struct fxio_getstat_packet), sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
@@ -812,7 +813,7 @@ int fileXioDclose(int fd)
 	return(rv);
 }
 
-int fileXioDread(int fd, iox_dirent_t *dirent)
+int fileXioDread(int fd, io_dirent_t *dirent)
 {
 	int rv;
 	struct fxio_dread_packet *packet=(struct fxio_dread_packet*)sbuff;
@@ -827,7 +828,7 @@ int fileXioDread(int fd, iox_dirent_t *dirent)
 	packet->dirent = dirent;
 
 	if (!IS_UNCACHED_SEG(dirent))
-		SifWriteBackDCache(dirent, sizeof(iox_dirent_t));
+		SifWriteBackDCache(dirent, sizeof(io_dirent_t));
 
 	if((rv = SifCallRpc(&cd0, FILEXIO_DREAD, fileXioBlockMode, sbuff, sizeof(struct fxio_dread_packet), sbuff, 4, (void *)&_fxio_intr, NULL)) >= 0)
 	{
@@ -1055,23 +1056,52 @@ int stat(const char *path, struct stat *st)
 {
   long long high;
   int ret;
-  iox_stat_t f_st;
+  int mc = 0;
+  io_stat_t f_st;
+  struct tm loctime;
 
   if ((ret = fileXioGetStat(path,&f_st)) < 0)
     return ret;
 
-  /* Type */
-  if (FIO_S_ISLNK(f_st.mode))
-    st->st_mode = S_IFLNK;
-  if (FIO_S_ISREG(f_st.mode))
-    st->st_mode = S_IFREG;
-  if (FIO_S_ISDIR(f_st.mode))
-    st->st_mode = S_IFDIR;
+  if ((path[0] == 'm') && (path[1] == 'c'))
+    mc = 1;
+  if ((path[0] == 'm') && (path[1] == 'a')
+      && (path[2] == 's') && (path[3] == 's'))
+    mc = 1;
+  if ((path[0] == 's') && (path[1] == 'd'))
+    mc = 1;
+  if ((path[0] == 's') && (path[1] == 'm') && (path[2] == 'b'))
+    mc = 1;
 
-  /* Access */
-  st->st_mode = st->st_mode + (f_st.mode & FIO_S_IRWXU);
-  st->st_mode = st->st_mode + (f_st.mode & FIO_S_IRWXG);
-  st->st_mode = st->st_mode + (f_st.mode & FIO_S_IRWXO);
+  /* Type */
+  if (mc)
+  {
+    if (IO_MC_ISDIR(f_st.mode))
+      st->st_mode = S_IFDIR;
+    if (IO_MC_ISREG(f_st.mode))
+      st->st_mode = S_IFREG;
+
+    if (f_st.mode & IO_MC_R)
+      st->st_mode = st->st_mode | IO_S_IRALL;
+    if (f_st.mode & IO_MC_W)
+      st->st_mode = st->st_mode | IO_S_IWALL;
+    if (f_st.mode & IO_MC_X)
+      st->st_mode = st->st_mode | IO_S_IXALL;
+  }
+  else
+  {
+    if (IO_S_ISLNK(f_st.mode))
+      st->st_mode = S_IFLNK;
+    if (IO_S_ISREG(f_st.mode))
+      st->st_mode = S_IFREG;
+    if (IO_S_ISDIR(f_st.mode))
+      st->st_mode = S_IFDIR;
+
+    /* Access */
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXU);
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXG);
+    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXO);
+  }
 
   /* Size */
   st->st_size = f_st.size;
@@ -1082,7 +1112,33 @@ int stat(const char *path, struct stat *st)
     st->st_size = st->st_size + (high << 32);
   }
 
-  /** @todo add stat time conversion */
+  /* Time, ignores timezone. */
+  loctime.tm_year =  f_st.ctime[6];
+  loctime.tm_year += f_st.ctime[7]<<8;
+  loctime.tm_mon  =  f_st.ctime[5]-1;
+  loctime.tm_mday =  f_st.ctime[4]-1;
+  loctime.tm_hour =  f_st.ctime[3];
+  loctime.tm_min  =  f_st.ctime[2];
+  loctime.tm_sec  =  f_st.ctime[1];
+  st->st_ctime    = mktime(&loctime);
+
+  loctime.tm_year =  f_st.atime[6];
+  loctime.tm_year += f_st.atime[7]<<8;
+  loctime.tm_mon  =  f_st.atime[5]-1;
+  loctime.tm_mday =  f_st.atime[4]-1;
+  loctime.tm_hour =  f_st.atime[3];
+  loctime.tm_min  =  f_st.atime[2];
+  loctime.tm_sec  =  f_st.atime[1];
+  st->st_atime    = mktime(&loctime);
+
+  loctime.tm_year =  f_st.mtime[6];
+  loctime.tm_year += f_st.mtime[7]<<8;
+  loctime.tm_mon  =  f_st.mtime[5]-1;
+  loctime.tm_mday =  f_st.mtime[4]-1;
+  loctime.tm_hour =  f_st.mtime[3];
+  loctime.tm_min  =  f_st.mtime[2];
+  loctime.tm_sec  =  f_st.mtime[1];
+  st->st_mtime    = mktime(&loctime);
 
   return 0;
 
@@ -1115,7 +1171,7 @@ DIR *opendir (const char *path)
 static struct dirent entry;
 struct dirent *readdir(DIR *d)
 {
-  iox_dirent_t __iox_entry;
+  io_dirent_t __io_entry;
 
 
   if (d == NULL)
@@ -1124,10 +1180,10 @@ struct dirent *readdir(DIR *d)
   if (d->d_fd < 0)
     return NULL;
 
-  if (fileXioDread(d->d_fd, &__iox_entry) < 1)
+  if (fileXioDread(d->d_fd, &__io_entry) < 1)
       return NULL;
 
-  strncpy(entry.d_name, __iox_entry.name, 256);
+  strncpy(entry.d_name, __io_entry.name, 256);
 
   return &entry;
 }

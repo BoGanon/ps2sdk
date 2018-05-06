@@ -17,10 +17,10 @@
 #include <string.h>
 #endif
 #include <errno.h>
+#include <sys/io_mount.h>
 #include <iomanX.h>
 #include <thsemap.h>
 #include <hdd-ioctl.h>
-#include <fileXio.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
@@ -50,7 +50,7 @@ extern u32 pfsBlockSize;
 static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char *filename, int openFlags, int mode);
 static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int operation);
 static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operation);
-static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat);
+static void fioStatFiller(pfs_cache_t *clink, io_stat_t *stat);
 static s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode);
 static int _remove(pfs_mount_t *pfsMount, const char *path, int mode);
 static int mountDevice(pfs_block_device_t *blockDev, int fd, int unit, int flag);
@@ -175,7 +175,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 			count = 0;
 
 			// Resolve actual file from a symlink
-			while ((fileInode->u.inode->mode & FIO_S_IFMT) == FIO_S_IFLNK)
+			while ((fileInode->u.inode->mode & IO_S_IFMT) == IO_S_IFLNK)
 			{
 				if (count++>=4)
 				{
@@ -195,10 +195,10 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 			// to a directory, and vice versa.
 			if ((openFlags & PFS_FDIRO) == 0)
 			{
-				if ((fileInode->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR)
+				if ((fileInode->u.inode->mode & IO_S_IFMT) == IO_S_IFDIR)
 					result=-EISDIR;
 			}else{
-				if ((fileInode->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
+				if ((fileInode->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR)
 					result=-ENOTDIR;
 			}
 
@@ -232,14 +232,14 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 		    (fileInode=pfsInodeCreate(parentInode, mode, pfsMount->uid,
 						  pfsMount->gid, &result)))
 		{
-			if ((mode & FIO_S_IFMT) == FIO_S_IFLNK)
+			if ((mode & IO_S_IFMT) == IO_S_IFLNK)
 			{
 				strcpy((char*)&fileInode->u.inode->data[1], (char*)freeSlot);
 				freeSlot=NULL;
 			}
 
 			// If new file is a directory, the fill self and parent entries
-			if ((mode & FIO_S_IFMT) == FIO_S_IFDIR)
+			if ((mode & IO_S_IFMT) == IO_S_IFDIR)
 			{
 				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->u.inode->data[1].subpart,
 					fileInode->u.inode->data[1].number << fileInode->pfsMount->inode_scale,
@@ -609,7 +609,7 @@ pfsOpen_slotFound:
 	}
 
 	// Do actual open
-	if((rv = openFile(pfsMount, freeSlot, name, f->mode, (mode & 0xfff) | FIO_S_IFREG)))
+	if((rv = openFile(pfsMount, freeSlot, name, f->mode, (mode & 0xfff) | IO_S_IFREG)))
 		goto pfsOpen_end;
 
 	freeSlot->fd = f;
@@ -775,7 +775,7 @@ static int _remove(pfs_mount_t *pfsMount, const char *path, int mode)
 	{
 		if(mode!=0)
 		{// remove dir
-			if((file->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
+			if((file->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR)
 				rv=-ENOTDIR;
 			else if(pfsCheckDirForFiles(file)==0)
 				rv=-ENOTEMPTY;
@@ -787,7 +787,7 @@ static int _remove(pfs_mount_t *pfsMount, const char *path, int mode)
 				rv=-EBUSY;
 		}
 		else// just a file
-			if((file->u.inode->mode & FIO_S_IFMT)==FIO_S_IFDIR)
+			if((file->u.inode->mode & IO_S_IFMT)==IO_S_IFDIR)
 				rv=-EISDIR;
 
 		if(rv==0)
@@ -825,7 +825,7 @@ int	pfsFioMkdir(iop_file_t *f, const char *path, int mode)
 	pfs_mount_t *pfsMount;
 	int rv;
 
-	mode = (mode & 0xfff) | 0x10000 | FIO_S_IFDIR;	// TODO: change to some constant/macro
+	mode = IO_S_UMSK | IO_S_IFDIR |(mode & 0777);
 
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
@@ -862,7 +862,7 @@ int pfsFioDopen(iop_file_t *f, const char *name)
     return pfsFioOpen(f, name, 0, 0);
 }
 
-int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
+int	pfsFioDread(iop_file_t *f, io_dirent_t *dirent)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	pfs_mount_t *pfsMount;
@@ -877,7 +877,7 @@ int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
 
 	pfsMount = fileSlot->clink->pfsMount;
 
-	if((fileSlot->clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
+	if((fileSlot->clink->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR)
 	{
 		rv = -ENOTDIR;
 	}
@@ -903,7 +903,7 @@ int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
 	return rv;
 }
 
-static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
+static void fioStatFiller(pfs_cache_t *clink, io_stat_t *stat)
 {
 	stat->mode = clink->u.inode->mode;
 	stat->attr = clink->u.inode->attr;
@@ -925,7 +925,7 @@ static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
 #endif
 }
 
-int	pfsFioGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)
+int	pfsFioGetstat(iop_file_t *f, const char *name, io_stat_t *stat)
 {
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
@@ -945,7 +945,7 @@ int	pfsFioGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)
 	return pfsFioCheckForLastError(pfsMount, rv);
 }
 
-int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
+int	pfsFioChstat(iop_file_t *f, const char *name, io_stat_t *stat, unsigned int statmask)
 {
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
@@ -962,19 +962,19 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 
 			clink->flags |= PFS_CACHE_FLAG_DIRTY;
 
-			if((statmask & FIO_CST_MODE) && ((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFLNK))
-				clink->u.inode->mode = (clink->u.inode->mode & FIO_S_IFMT) | (stat->mode & 0xfff);
-			if(statmask & FIO_CST_ATTR)
+			if((statmask & IO_CST_MODE) && ((clink->u.inode->mode & IO_S_IFMT) != IO_S_IFLNK))
+				clink->u.inode->mode = (clink->u.inode->mode & IO_S_IFMT) | (stat->mode & 0777);
+			if(statmask & IO_CST_ATTR)
 				clink->u.inode->attr = (clink->u.inode->attr & 0xA0) | (stat->attr & 0xFF5F);
-			if(statmask & FIO_CST_SIZE)
+			if(statmask & IO_CST_SIZE)
 				rv = -EACCES;
-			if(statmask & FIO_CST_CT)
+			if(statmask & IO_CST_CT)
 				memcpy(&clink->u.inode->ctime, stat->ctime, sizeof(pfs_datetime_t));
-			if(statmask & FIO_CST_AT)
+			if(statmask & IO_CST_AT)
 				memcpy(&clink->u.inode->atime, stat->atime, sizeof(pfs_datetime_t));
-			if(statmask & FIO_CST_MT)
+			if(statmask & IO_CST_MT)
 				memcpy(&clink->u.inode->mtime, stat->mtime, sizeof(pfs_datetime_t));
-			if(statmask & FIO_CST_PRVT) {
+			if(statmask & IO_CST_PRVT) {
 				clink->u.inode->uid = stat->private_0;
 				clink->u.inode->gid = stat->private_1;
 			}
@@ -1018,7 +1018,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 
 		if ((parentNew=pfsInodeGetParent(pfsMount, NULL, new, path2, &result))==0) goto exit;
 
-		f=(iFileOld->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR;
+		f=(iFileOld->u.inode->mode & IO_S_IFMT) == IO_S_IFDIR;
 
 		if ((parentNew->nused != nused) && ((parentOld!=parentNew) || (parentNew->nused!=2))){
 			result=-EBUSY;
@@ -1028,7 +1028,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 		iFileNew=pfsInodeGetFileInDir(parentNew, path2, &result);
 		if (iFileNew){
 			if (f){
-				if ((iFileNew->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
+				if ((iFileNew->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR)
 					result=-ENOTDIR;
 				else
 					if (pfsCheckDirForFiles(iFileNew)){
@@ -1041,7 +1041,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 					}else
 						result=-ENOTEMPTY;
 			}else
-				if ((iFileNew->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR)
+				if ((iFileNew->u.inode->mode & IO_S_IFMT) == IO_S_IFDIR)
 					result=-EISDIR;
 				else
 					if (iFileNew->nused >= 2)
@@ -1157,7 +1157,7 @@ int pfsFioChdir(iop_file_t *f, const char *name)
 
 	clink = pfsInodeGetFile(pfsMount, 0, name, &result);
 	if(clink != NULL) {
-		if((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
+		if((clink->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR)
 			result = -ENOTDIR;
 		else {
 
@@ -1229,7 +1229,7 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & FILEXIO_MOUNTFLAG_READONLY) ? IO_RDONLY : IO_RDWR, 0644); // ps2hdd.irx fd
+	fd = open(devname, (flag & IO_MT_RDONLY) ? IO_RDONLY : IO_RDWR, 0644); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {
@@ -1275,7 +1275,7 @@ int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
 {
 	int rv;
 	pfs_mount_t *pfsMount;
-	int mode=0x141FF;
+	int mode= IO_S_UMSK|IO_S_IFLNK|IO_S_IRWXA;
 
 	if(old==NULL || new==NULL)
 		return -ENOENT;
@@ -1301,7 +1301,7 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int bufl
 
 	if((clink=pfsInodeGetFile(pfsMount, NULL, path, &rv))!=NULL)
 	{
-		if((clink->u.inode->mode & FIO_S_IFMT) == FIO_S_IFLNK)
+		if((clink->u.inode->mode & IO_S_IFMT) == IO_S_IFLNK)
 			rv=-EINVAL;
 		else
 		{

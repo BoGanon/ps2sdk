@@ -71,9 +71,9 @@ typedef struct _iop_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, iox_dirent_t *);
-	int	(*getstat)(iop_file_t *, const char *, iox_stat_t *);
-	int	(*chstat)(iop_file_t *, const char *, iox_stat_t *, unsigned int);
+	int	(*dread)(iop_file_t *, io_dirent_t *);
+	int	(*getstat)(iop_file_t *, const char *, io_stat_t *);
+	int	(*chstat)(iop_file_t *, const char *, io_stat_t *, unsigned int);
 
 #ifndef IOMAN_NO_EXTENDED
 	/* Extended ops start here.  */
@@ -105,10 +105,10 @@ int mkdir(const char *path, int mode);
 int rmdir(const char *path);
 int dopen(const char *path);
 int dclose(int fd);
-int dread(int fd, iox_dirent_t *buf);
+int dread(int fd, io_dirent_t *buf);
 
-int getstat(const char *name, iox_stat_t *stat);
-int chstat(const char *name, iox_stat_t *stat, unsigned int statmask);
+int getstat(const char *name, io_stat_t *stat);
+int chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 
 /** This can take take more than one form.  */
 int format(const char *dev, const char *blockdev, void *arg, int arglen);

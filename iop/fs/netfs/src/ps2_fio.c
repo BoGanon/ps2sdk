@@ -140,36 +140,6 @@ static inline void fdh_freefd(int fd)
 /** Get fd list entry ps2 file descriptor value. */
 #define fdh_getrealfd(a) (fd_info_list[a].realfd)
 
-
-/** changes mode from ioman to iomanx format
- * @ingroup ps2netfs
- */
-static inline int convmode_to_iomanx(int stat)
-{
-  int mode = 0;
-
-  if FIO_SO_ISLNK(stat) mode |= FIO_S_IFLNK; // Symbolic link
-  if FIO_SO_ISREG(stat) mode |= FIO_S_IFREG; // regular file
-  if FIO_SO_ISDIR(stat) mode |= FIO_S_IFDIR; // directory
-
-  if (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) // read
-    mode |= FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH;
-  if (((stat) & FIO_SO_IWOTH) == FIO_SO_IWOTH) // write
-    mode |= FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH;
-  if (((stat) & FIO_SO_IXOTH) == FIO_SO_IXOTH) // execute
-    mode |= FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH;
-
-  return mode;
-}
-
-/** changes mode from iomanx to ioman format
- * @ingroup ps2netfs
- */
-static inline int convmode_from_iomanx(int stat)
-{
-  return stat;
-}
-
 /** Shortcut to close the socket and cleanup.
  * @ingroup ps2netfs
  *
@@ -1185,35 +1155,17 @@ static int ps2netfs_op_dread(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
+    io_dirent_t dirent;
+    retval = io_dread(fdptr->realfd,&dirent);
+    if (retval > 0)
     {
-      io_dirent_t dirent;
-      retval = io_dread(fdptr->realfd,&dirent);
-      if (retval > 0)
-      {
-        dreadrly->mode   = htonl(convmode_to_iomanx(dirent.stat.mode));
-        dreadrly->attr   = htonl(dirent.stat.attr);
-        dreadrly->size   = htonl(dirent.stat.size);
-        dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
-        strncpy(dreadrly->name,dirent.name,255);
-        dreadrly->name[255] = '\0';
-      }
-    }
-    else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
-    {
-      iox_dirent_t dirent;
-      retval = dread(fdptr->realfd,&dirent);
-      if (retval > 0)
-      {
-        dreadrly->mode   = htonl(dirent.stat.mode);
-        dreadrly->attr   = htonl(dirent.stat.attr);
-        dreadrly->size   = htonl(dirent.stat.size);
-        dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
-        strncpy(dreadrly->name,dirent.name,255);
-        dreadrly->name[255] = '\0';
-      }
+      dreadrly->mode   = htonl(dirent.stat.mode);
+      dreadrly->attr   = htonl(dirent.stat.attr);
+      dreadrly->size   = htonl(dirent.stat.size);
+      dreadrly->hisize = htonl(0);
+      memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
+      strncpy(dreadrly->name,dirent.name,255);
+      dreadrly->name[255] = '\0';
     }
   }
   dbgprintf("ps2netfs: dread '%s' %d\n",dreadrly->name,dreadrly->size);

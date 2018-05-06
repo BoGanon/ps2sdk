@@ -29,7 +29,7 @@
 #include <sifcmd.h>
 #include <errno.h>
 
-#include "fileXio_iop.h"
+#include <fileXio.h>
 
 #define MODNAME "IOX/File_Manager_Rpc"
 IRX_ID(MODNAME, 1, 2);
@@ -97,7 +97,7 @@ static void* fileXioRpc_Dread(unsigned int* sbuff);
 static void* fileXioRpc_Dclose(unsigned int* sbuff);
 static void* filexioRpc_SetRWBufferSize(void *sbuff);
 static void* fileXioRpc_Getdir(unsigned int* sbuff);
-static void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry);
+static void DirEntryCopy(struct fileXioDirEntry* dirEntry, io_dirent_t* internalDirEntry);
 
 // RPC server
 static void* fileXio_rpc_server(int fno, void *data, int size);
@@ -162,7 +162,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
 
 static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 {
-  iox_stat_t stat;
+  io_stat_t stat;
   int infd, outfd, size, remain, i, retval = 0;
 
   if ((infd = open(src, IO_RDONLY, 0666)) < 0) {
@@ -339,7 +339,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 {
 	int matched_entries;
       int fd, res;
-  	iox_dirent_t dirbuf;
+  	io_dirent_t dirbuf;
 	struct fileXioDirEntry localDirEntry;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 	struct t_SifDmaTransfer dmaStruct;
@@ -414,7 +414,7 @@ static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, in
 static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
 {
       int res=0;
-	iox_stat_t localStat;
+	io_stat_t localStat;
       SifRpcReceiveData_t rdata;
 
 	SifRpcGetOtherData(&rdata, (void *)eeptr, &localStat, 64, 0);
@@ -425,7 +425,7 @@ static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
 
 static int fileXio_getstat_RPC(char *filename, void* eeptr)
 {
-	iox_stat_t localStat;
+	io_stat_t localStat;
 	int res = 0;
 	struct t_SifDmaTransfer dmaStruct;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
@@ -438,7 +438,7 @@ static int fileXio_getstat_RPC(char *filename, void* eeptr)
 		// setup the dma struct
 		dmaStruct.src = &localStat;
 		dmaStruct.dest = eeptr;
-		dmaStruct.size = sizeof(iox_stat_t);
+		dmaStruct.size = sizeof(io_stat_t);
 		dmaStruct.attr = 0;
 		// Do the DMA transfer
 		CpuSuspendIntr(&intStatus);
@@ -452,7 +452,7 @@ static int fileXio_getstat_RPC(char *filename, void* eeptr)
 static int fileXio_dread_RPC(int fd, void* eeptr)
 {
       int res=0;
-	iox_dirent_t localDir;
+	io_dirent_t localDir;
       struct t_SifDmaTransfer dmaStruct;
       int intStatus;	// interrupt status - for dis/en-abling interrupts
 
@@ -1143,7 +1143,7 @@ static void* fileXio_rpc_server(int fno, void *data, int size)
 
 
 // Copy a DIR Entry from the native format to our format
-static void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry)
+static void DirEntryCopy(struct fileXioDirEntry* dirEntry, io_dirent_t* internalDirEntry)
 {
 	dirEntry->fileSize = internalDirEntry->stat.size;
 	dirEntry->fileProperties = internalDirEntry->stat.attr;

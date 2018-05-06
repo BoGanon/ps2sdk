@@ -20,6 +20,7 @@
 #include <malloc.h>
 
 // PS2DRV includes
+#include "sys/io_mount.h"
 #include "sys/libhdd_ioctl.h"
 #include "fileXio_rpc.h"
 #include "errno.h"
@@ -130,7 +131,7 @@ int hddFormat()
 
 int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 {
-	iox_dirent_t dirEnt;
+	io_dirent_t dirEnt;
 	int count = 0;
 	u32 size = 0;
 	int hddFd;
@@ -219,7 +220,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 
 		if(dirEnt.stat.mode == FS_TYPE_PFS)
 		{
-			rv = fileXioMount("pfs0:", hddFs[count].filename, FILEXIO_MOUNTFLAG_READONLY);
+			rv = fileXioMount("pfs0:", hddFs[count].filename, IO_MT_RDONLY);
 			if(rv == 0)
 			{
 
@@ -257,7 +258,7 @@ void hddGetInfo(t_hddInfo *info)
 
 static void hddUpdateInfo()
 {
-	iox_dirent_t infoDirEnt;
+	io_dirent_t infoDirEnt;
 	int rv;
 	int hddFd;
 	u32 hddUsed = 0;

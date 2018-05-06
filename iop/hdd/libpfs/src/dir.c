@@ -17,8 +17,8 @@
 #else
 #include <string.h>
 #endif
+#include <sys/io_mount.h>
 #include <iomanX.h>
-#include <fileXio.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
@@ -158,7 +158,7 @@ pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry_t *dentry, char *path1
 	dentry->inode=bi->number;
 	dentry->sub=(u8)bi->subpart;
 	dentry->pLen=strlen(path1);
-	dentry->aLen=len | (mode & FIO_S_IFMT);
+	dentry->aLen=len | (mode & IO_S_IFMT);
 	memcpy(dentry->path, path1, dentry->pLen & 0xFF);
 
 	return clink;
@@ -176,7 +176,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *b
 		len=dentry->aLen & 0xFFF;
 		if (dentry->pLen)
 			len-=(dentry->pLen + 11) & 0x1FC;
-		dentry->aLen=(dentry->aLen & FIO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
+		dentry->aLen=(dentry->aLen & IO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
 		dentry=(pfs_dentry_t *)((u8*)dentry + (dentry->aLen & 0xFFF));
 	}else{
 		int offset;
@@ -214,7 +214,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 
 			if (dnext==dentry){
 				if (dlast)
-					dlast->aLen=(dlast->aLen & FIO_S_IFMT) | ((dlast->aLen & 0xFFF) + aLen);
+					dlast->aLen=(dlast->aLen & IO_S_IFMT) | ((dlast->aLen & 0xFFF) + aLen);
 				else{
 					dnext->pLen=dnext->inode=0;
 
@@ -254,7 +254,7 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs
 	dentry->path[1]='\0';
 	dentry->sub=(u8)self->subpart;
 	dentry->pLen=1;
-	dentry->aLen=12 | FIO_S_IFDIR;
+	dentry->aLen=12 | IO_S_IFDIR;
 
 	dentry=(pfs_dentry_t *)((u8*)dentry + 12);
 
@@ -264,7 +264,7 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs
 	dentry->path[2]='\0';
 	dentry->sub=(u8)parent->subpart;
 	dentry->pLen=2;
-	dentry->aLen=500 | FIO_S_IFDIR;
+	dentry->aLen=500 | IO_S_IFDIR;
 }
 
 pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *result)
@@ -348,7 +348,7 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 g
 	ci->u.inode->uid=uid;
 	ci->u.inode->gid=gid;
 
-	if ((mode & FIO_S_IFMT) == FIO_S_IFDIR){
+	if ((mode & IO_S_IFMT) == IO_S_IFDIR){
 		ci->u.inode->attr=0xA0;
 		ci->u.inode->size=sizeof(pfs_dentry_t);
 		val=2;
@@ -421,7 +421,7 @@ pfs_cache_t* pfsInodeGetParent(pfs_mount_t *pfsMount, pfs_cache_t *clink, const 
 		// the cached inode for the directory which holds the file/dir in path
 		if (filename2[0]==0)
 		{
-			if ((clink->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR)
+			if ((clink->u.inode->mode & IO_S_IFMT) == IO_S_IFDIR)
 				return clink;
 
 			pfsCacheFree(clink);
@@ -431,7 +431,7 @@ pfs_cache_t* pfsInodeGetParent(pfs_mount_t *pfsMount, pfs_cache_t *clink, const 
 
 		inode=pfsInodeGetFileInDir(clink, path, result);
 
-		if (inode && ((inode->u.inode->mode & FIO_S_IFMT) == FIO_S_IFLNK))
+		if (inode && ((inode->u.inode->mode & IO_S_IFMT) == IO_S_IFLNK))
 		{
 			if (pfsSymbolicLinks >= 4)
 			{
@@ -497,7 +497,7 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 	u32 i;
 	pfs_cache_t *inode;
 
-	if ((mode & FIO_S_IFMT) == FIO_S_IFDIR)
+	if ((mode & IO_S_IFMT) == IO_S_IFDIR)
 	{
 		if (pfsMount->num_subs > clink->u.inode->subpart)
 			clink->u.inode->subpart++;
@@ -527,7 +527,7 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 
 	// Initialise the inode (which has been allocate blocks specified by a)
 	pfsInodeFill(inode, (pfs_blockinfo_t*)&a, mode, uid, gid);
-	if ((mode & FIO_S_IFMT) != FIO_S_IFDIR)
+	if ((mode & IO_S_IFMT) != IO_S_IFDIR)
 		return inode;
 
 	b.number=a.number;
@@ -553,10 +553,10 @@ int pfsCheckAccess(pfs_cache_t *clink, int flags)
 	int mode;
 
 	// Bail if trying to write to read-only mount
-	if ((clink->pfsMount->flags & FILEXIO_MOUNTFLAG_READONLY) && (flags & IO_WRONLY))
+	if ((clink->pfsMount->flags & IO_MT_RDONLY) && (flags & IO_WRONLY))
 		return -EROFS;
 
-	if (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) &&
+	if (((clink->u.inode->mode & IO_S_IFMT) != IO_S_IFDIR) &&
 		((clink->u.inode->mode & 0111) == 0))
 		mode=6;
 	else

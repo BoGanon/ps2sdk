@@ -12,9 +12,9 @@
 /**
  * @file
  * EE File IO handling
- * @defgroup libfileio Fileio: File I/O functions.
+ * @defgroup fileio File I/O
  *
- * The file input/output handling library for rom0:IOMAN and rom0:FILEIO.
+ * The file input/output handling library.
  *
  * @warning  @ref fioDread "fioDread()" and @ref fioGetstat "fioGetstat()"
  *           are unstable.
