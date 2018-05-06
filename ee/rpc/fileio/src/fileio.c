@@ -832,12 +832,12 @@ int stat(const char *path, struct stat *st)
 {
   long long high;
   int mc = 0;
-  int ret;
+  unsigned int years = 0;
   io_stat_t f_st;
   struct tm loctime;
 
-  if ((ret = fioGetstat(path,&f_st)) < 0)
-    return ret;
+  if (fioGetstat(path,&f_st) < 0)
+    return -1;
 
   if ((path[0] == 'm') && (path[1] == 'c'))
     mc = 1;
@@ -857,11 +857,11 @@ int stat(const char *path, struct stat *st)
     if (IO_MC_ISREG(f_st.mode))
       st->st_mode = S_IFREG;
     if (f_st.mode & IO_MC_R)
-      st->st_mode = st->st_mode | IO_S_IRALL;
+      st->st_mode = st->st_mode | S_IRUSR | S_IRGRP | S_IROTH;
     if (f_st.mode & IO_MC_W)
-      st->st_mode = st->st_mode | IO_S_IWALL;
+      st->st_mode = st->st_mode | S_IWUSR | S_IWGRP | S_IWOTH;
     if (f_st.mode & IO_MC_X)
-      st->st_mode = st->st_mode | IO_S_IXALL;
+      st->st_mode = st->st_mode | S_IXUSR | S_IXGRP | S_IXOTH;
   }
   else
   {
@@ -873,9 +873,26 @@ int stat(const char *path, struct stat *st)
       st->st_mode = S_IFDIR;
 
     /* Access */
-    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXU);
-    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXG);
-    st->st_mode = st->st_mode + (f_st.mode & IO_S_IRWXO);
+    if (f_st.mode & IO_S_IROTH)
+      st->st_mode = st->st_mode | S_IROTH;
+    if (f_st.mode & IO_S_IWOTH)
+      st->st_mode = st->st_mode | S_IWOTH;
+    if (f_st.mode & IO_S_IXOTH)
+      st->st_mode = st->st_mode | S_IXOTH;
+
+    if (f_st.mode & IO_S_IRGRP)
+      st->st_mode = st->st_mode | S_IRGRP;
+    if (f_st.mode & IO_S_IWGRP)
+      st->st_mode = st->st_mode | S_IWGRP;
+    if (f_st.mode & IO_S_IXGRP)
+      st->st_mode = st->st_mode | S_IXGRP;
+
+    if (f_st.mode & IO_S_IRUSR)
+      st->st_mode = st->st_mode | S_IRUSR;
+    if (f_st.mode & IO_S_IWUSR)
+      st->st_mode = st->st_mode | S_IWUSR;
+    if (f_st.mode & IO_S_IXUSR)
+      st->st_mode = st->st_mode | S_IXUSR;
   }
 
   /* Size */
@@ -887,8 +904,9 @@ int stat(const char *path, struct stat *st)
   }
 
   /* Time, ignores timezone. */
-  loctime.tm_year =  f_st.ctime[6];
-  loctime.tm_year += f_st.ctime[7]<<8;
+  years = f_st.ctime[7];
+  years = (years<<8) + f_st.ctime[6];
+  loctime.tm_year =  years;
   loctime.tm_mon  =  f_st.ctime[5]-1;
   loctime.tm_mday =  f_st.ctime[4]-1;
   loctime.tm_hour =  f_st.ctime[3];
@@ -896,8 +914,10 @@ int stat(const char *path, struct stat *st)
   loctime.tm_sec  =  f_st.ctime[1];
   st->st_ctime    = mktime(&loctime);
 
-  loctime.tm_year =  f_st.atime[6];
-  loctime.tm_year += f_st.atime[7]<<8;
+  years = 0;
+  years = f_st.atime[7];
+  years = (years<<8) + f_st.atime[6];
+  loctime.tm_year =  years;
   loctime.tm_mon  =  f_st.atime[5]-1;
   loctime.tm_mday =  f_st.atime[4]-1;
   loctime.tm_hour =  f_st.atime[3];
@@ -905,8 +925,10 @@ int stat(const char *path, struct stat *st)
   loctime.tm_sec  =  f_st.atime[1];
   st->st_atime    = mktime(&loctime);
 
-  loctime.tm_year =  f_st.mtime[6];
-  loctime.tm_year += f_st.mtime[7]<<8;
+  years = 0;
+  years = f_st.mtime[7];
+  years = (years<<8) + f_st.mtime[6];
+  loctime.tm_year =  years;
   loctime.tm_mon  =  f_st.mtime[5]-1;
   loctime.tm_mday =  f_st.mtime[4]-1;
   loctime.tm_hour =  f_st.mtime[3];
@@ -914,7 +936,20 @@ int stat(const char *path, struct stat *st)
   loctime.tm_sec  =  f_st.mtime[1];
   st->st_mtime    = mktime(&loctime);
 
+  if ((st->st_ctime == -1) || (st->st_atime == -1) || (st->st_mtime == -1))
+    return -1;
+
   return 0;
+}
+
+int fstat(int fd, struct stat *sbuf)
+{
+  return -1;
+}
+
+int isatty(int fd)
+{
+  return 1;
 }
 
 int open(const char *name, int flags, ...)

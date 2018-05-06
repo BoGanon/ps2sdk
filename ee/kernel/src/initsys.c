@@ -47,6 +47,7 @@ void TerminateLibrary(void)
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include <unistd.h>
 extern void * _end;
 
 void *ps2_sbrk(size_t increment)
@@ -65,5 +66,10 @@ void *ps2_sbrk(size_t increment)
 	}
 
 	return ret;
+}
+
+void *sbrk(ptrdiff_t increment)
+{
+	return ps2_sbrk((size_t)increment);
 }
 #endif

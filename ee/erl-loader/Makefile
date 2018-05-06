@@ -19,8 +19,9 @@ EE_INCS += -I$(PS2SDKSRC)/ee/erl/include \
 	   -I$(PS2SDKSRC)/ee/erl-loader/src
 
 EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a \
-	   $(PS2SDKSRC)/ee/rpc/fileio/lib/libfileio.a \
+	   $(PS2SDKSRC)/ee/rpc/fileio/lib/libfileio.a -lc -lm \
 	   $(PS2SDKSRC)/ee/kernel/lib/libkernel.a
+
 EE_OBJS = erl-loader.o
 
 all: $(LOADER_BIN)
@@ -42,9 +43,9 @@ $(EE_OBJS_DIR)erl-loader.o: | $(EE_OBJS_DIR)
 $(LOADER_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
 	$(EE_C_COMPILE) -c $(EE_SRC_DIR)dummy-exports.c -o $(EE_OBJS_DIR)dummy-exports.o
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)dummy-exports.o $(EE_LIBS) -lc -lm -lgcc
+	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)dummy-exports.o $(EE_LIBS) -lgcc
 	$(EE_SRC_DIR)build-exports.sh
 	rm $(EE_BIN_DIR)tmp.elf
 	$(EE_C_COMPILE) -c $(EE_SRC_DIR)exports.c -o $(EE_OBJS_DIR)exports.o
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)exports.o $(EE_LIBS) -lc -lm -lgcc
+	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)exports.o $(EE_LIBS) -lgcc
