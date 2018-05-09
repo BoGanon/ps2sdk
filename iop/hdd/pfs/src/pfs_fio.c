@@ -28,6 +28,11 @@
 #include "pfs_fio.h"
 #include "pfs_fioctl.h"
 
+/* I thought this was for umask bits but it's an internal mode flag for
+   mkdir and symlink for openFile. The same value is reused for a
+   different purpose in fileTransferRemainder and fileTransfer. */
+#define  PFS_INTERNAL_CREATE 0200000
+
 ///////////////////////////////////////////////////////////////////////////////
 //	Globals
 
@@ -166,7 +171,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 		flags=openFlagArray[openFlags & IO_RDWR];
 		if (openFlags & IO_TRUNC)	flags |= 2;
 		if (openFlags & PFS_FDIRO)		flags |= 4;
-		if ((mode & 0x10000) ||
+		if ((mode & PFS_INTERNAL_CREATE) ||
 		   ((openFlags & (IO_CREAT|IO_EXCL)) == (IO_CREAT|IO_EXCL))){
 			result=-EEXIST;
 		}
@@ -825,7 +830,7 @@ int	pfsFioMkdir(iop_file_t *f, const char *path, int mode)
 	pfs_mount_t *pfsMount;
 	int rv;
 
-	mode = IO_S_UMSK | IO_S_IFDIR |(mode & 0777);
+	mode = PFS_INTERNAL_CREATE | IO_S_IFDIR |(mode & 0777);
 
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
@@ -1275,7 +1280,7 @@ int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
 {
 	int rv;
 	pfs_mount_t *pfsMount;
-	int mode= IO_S_UMSK|IO_S_IFLNK|IO_S_IRWXA;
+	int mode= PFS_INTERNAL_CREATE|IO_S_IFLNK|IO_S_IRWXA;
 
 	if(old==NULL || new==NULL)
 		return -ENOENT;
