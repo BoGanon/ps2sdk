@@ -120,7 +120,7 @@ int devscan_setup(int devtype)
     {
       if (devinfo_table[i])
         /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
-        if ((devinfo_table[i]->type & IOP_DT_FSEXT) && (devinfo_table[i]->type & devtype))
+        if ((devinfo_table[i]->type & FILEXIO_DT_FSEXT) && (devinfo_table[i]->type & devtype))
         {
           dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMANX;
           strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);

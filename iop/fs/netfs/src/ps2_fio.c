@@ -1151,24 +1151,12 @@ static int ps2netfs_op_dread(char *buf, int len)
   dreadrly = (ps2netfs_pkt_dread_rly *)&ps2netfs_send_packet[0];
   memset(dreadrly,0,sizeof(ps2netfs_pkt_dread_rly));
 
-  // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    io_dirent_t dirent;
-    retval = io_dread(fdptr->realfd,&dirent);
-    if (retval > 0)
-    {
-      dreadrly->mode   = htonl(dirent.stat.mode);
-      dreadrly->attr   = htonl(dirent.stat.attr);
-      dreadrly->size   = htonl(dirent.stat.size);
-      dreadrly->hisize = htonl(0);
-      memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
-      strncpy(dreadrly->name,dirent.name,255);
-      dreadrly->name[255] = '\0';
-    }
+    retval = io_dread(fdptr->realfd,(fio_dirent_t*)dreadrly->buf);
   }
-  dbgprintf("ps2netfs: dread '%s' %d\n",dreadrly->name,dreadrly->size);
+
   // Build packet
   dreadrly->cmd = htonl(PS2NETFS_DREAD_RLY);
   dreadrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_dread_rly));

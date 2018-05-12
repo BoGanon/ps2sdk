@@ -194,19 +194,13 @@ typedef struct
     int fd;
 } __attribute__((packed)) ps2netfs_pkt_dread_req;
 
+/* dread has implementation defined behavior. */
 typedef struct
 {
     unsigned int cmd;
     unsigned short len;
     int retval;
-    unsigned int mode;
-    unsigned int attr;
-    unsigned int size;
-    unsigned char ctime[8];
-    unsigned char atime[8];
-    unsigned char mtime[8];
-    unsigned int hisize;
-    char name[PS2NETFS_MAX_PATH];
+    char buf[324];
 } __attribute__((packed)) ps2netfs_pkt_dread_rly;
 
 typedef struct
