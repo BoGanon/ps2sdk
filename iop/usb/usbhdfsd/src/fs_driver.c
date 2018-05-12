@@ -15,7 +15,12 @@
 //---------------------------------------------------------------------------
 #include <stdio.h>
 #include <errno.h>
+
+#ifdef USE_IOMAN
 #include <ioman.h>
+#else
+#include <iomanX.h>
+#endif
 
 #ifdef WIN32
 #include <malloc.h>
@@ -212,7 +217,14 @@ static int fs_init(iop_device_t *driver)
 }
 
 //---------------------------------------------------------------------------
-static int fs_open(iop_file_t* fd, const char *name, int mode) {
+#ifdef USE_IOMAN
+static int fs_open(iop_file_t* fd, const char *name, int mode)
+#else
+static int fs_open(iop_file_t* fd, const char *name, int mode, int unused)
+#endif
+{
+
+
 	fat_driver* fatd;
 	fs_rec* rec, *rec2;
 	int ret;
@@ -512,7 +524,12 @@ static int fs_remove(iop_file_t *fd, const char *name) {
 }
 
 //---------------------------------------------------------------------------
-static int fs_mkdir(iop_file_t *fd, const char *name) {
+#ifdef USE_IOMAN
+static int fs_mkdir(iop_file_t *fd, const char *name)
+#else
+static int fs_mkdir(iop_file_t *fd, const char *name, int unused)
+#endif
+{
 	fat_driver* fatd;
 	int ret;
 	int sfnOffset;
@@ -613,7 +630,11 @@ static int fs_dclose(iop_file_t *fd)
 }
 
 //---------------------------------------------------------------------------
+#ifdef USE_IOMAN
+static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
+#else
 static int fs_dread(iop_file_t *fd, io_dirent_t *buffer)
+#endif
 {
 	fat_driver* fatd;
 	int ret;
