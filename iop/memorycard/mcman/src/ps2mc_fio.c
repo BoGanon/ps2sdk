@@ -273,7 +273,7 @@ lbl1:
 }
 
 //--------------------------------------------------------------
-int mcman_dread2(int fd, io_dirent_t *dirent)
+int mcman_dread2(int fd, fio_dirent_t *dirent)
 {
 	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
@@ -301,7 +301,7 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 		return sceMcResSucceed;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof (io_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof (internal_dirent_t), 0);
 	strcpy(dirent->name, fse->name);
 	*(u8 *)&dirent->name[32] = 0;
 

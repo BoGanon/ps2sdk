@@ -916,7 +916,7 @@ int McGetDir(int port, int slot, char *dirname, int flags, int maxent, sceMcTblG
 }
 
 //--------------------------------------------------------------
-int mcman_dread(int fd, io_dirent_t *dirent)
+int mcman_dread(int fd, fio_dirent_t *dirent)
 {
 	register int r;
 	register MC_FHANDLE *fh;
