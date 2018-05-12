@@ -160,7 +160,7 @@ static iop_device_ops_t dev9x_ops =
 static iop_device_t dev9x_device =
 {
 	"dev9x",
-	IOP_DT_FS | IOP_DT_FSEXT,
+	IOP_DT_FS | FILEXIO_DT_FSEXT,
 	1,
 	"DEV9",
 	&dev9x_ops

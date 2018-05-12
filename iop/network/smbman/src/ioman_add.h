@@ -3,7 +3,7 @@
 
 #include "sys/io_stat.h"
 
-#define IOP_DT_FSEXT	0x10000000
+#define FILEXIO_DT_FSEXT	0x10000000
 
 typedef struct _iop_ext_device {
 	const char *name;

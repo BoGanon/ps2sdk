@@ -42,276 +42,305 @@ extern int unhook_ioman();
 
 iop_device_t **GetDeviceList(void)
 {
-    return(dev_list);
+  return(dev_list);
 }
 
 int _start(int argc, char **argv)
 {
-	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
-    {
-		return MODULE_NO_RESIDENT_END;
-	}
+  if(RegisterLibraryEntries(&_exp_iomanx) != 0)
+  {
+    return MODULE_NO_RESIDENT_END;
+  }
 
-    memset(dev_list, 0, sizeof(dev_list));
-    memset(file_table, 0, sizeof(file_table));
+  memset(dev_list, 0, sizeof(dev_list));
+  memset(file_table, 0, sizeof(file_table));
 
-    if(hook_ioman() != 0)
-    {
-        return MODULE_NO_RESIDENT_END;
-    }
+  if(hook_ioman() != 0)
+  {
+    return MODULE_NO_RESIDENT_END;
+  }
 
-	return MODULE_RESIDENT_END;
+  return MODULE_RESIDENT_END;
 }
 
 int shutdown()
 {
-    unhook_ioman();
-	return MODULE_NO_RESIDENT_END;
+  unhook_ioman();
+  return MODULE_NO_RESIDENT_END;
 }
 
 int AddDrv(iop_device_t *device)
 {
-	int i, res = -1;
-    int oldIntr;
+  int i, res = -1;
+  int oldIntr;
 
-    CpuSuspendIntr(&oldIntr);
+  CpuSuspendIntr(&oldIntr);
 
-	for (i = 0; i < MAX_DEVICES; i++)
-	{
-		if (dev_list[i] == NULL)
-			break;
-	}
+  for (i = 0; i < MAX_DEVICES; i++)
+  {
+    if (dev_list[i] == NULL)
+    break;
+  }
 
-	if (i >= MAX_DEVICES)
-	{
-	    CpuResumeIntr(oldIntr);
-		return res;
-	}
-
-	dev_list[i] = device;
+  if (i >= MAX_DEVICES)
+  {
     CpuResumeIntr(oldIntr);
+    return res;
+  }
 
-    FlushIcache();
+  dev_list[i] = device;
+  CpuResumeIntr(oldIntr);
 
-	if ((res = device->ops->init(device)) < 0)
-	{
-		dev_list[i] = NULL;
-		return(-1);
-	}
+  FlushIcache();
 
-	return(0);
+  if ((res = device->ops->init(device)) < 0)
+  {
+    dev_list[i] = NULL;
+    return(-1);
+  }
+
+  return(0);
 }
 
 int DelDrv(const char *name)
 {
-	int i;
+  int i;
 
-	for (i = 0; i < MAX_DEVICES; i++) {
-		if (dev_list[i] != NULL && !strcmp(name, dev_list[i]->name)) {
-			dev_list[i]->ops->deinit(dev_list[i]);
-			dev_list[i] = NULL;
-			return 0;
-		}
-	}
+  for (i = 0; i < MAX_DEVICES; i++) {
+    if (dev_list[i] != NULL && !strcmp(name, dev_list[i]->name)) {
+      dev_list[i]->ops->deinit(dev_list[i]);
+      dev_list[i] = NULL;
+      return 0;
+    }
+  }
 
-	return -1;
+  return -1;
 }
 
 
 static char * find_iop_device(const char *dev, int *unit, iop_device_t **device)
 {
-	char canon[16];
-	char *filename, *tail, *d = (char *)dev;
-	int i, len, num = 0;
+  char canon[16];
+  char *filename, *tail, *d = (char *)dev;
+  int i, len, num = 0;
 
-	if (*d == ' ') {
-		while (*d == ' ')
-			d++;
-		d--;
-	}
+  if (*d == ' ') {
+    while (*d == ' ')
+      d++;
+      d--;
+  }
 
-	if ((tail = index(d, ':')) == NULL)
-		return (char *)-1;
+  if ((tail = index(d, ':')) == NULL)
+    return ((char *)-1);
 
-	len = (int)(tail - d);
-	strncpy(canon, d, len);
-	canon[len] = '\0';
+  len = (int)(tail - d);
+  strncpy(canon, d, len);
+  canon[len] = '\0';
 
-	/* This is the name passed to the device op.  */
-	filename = d + len + 1;
+  /* This is the name passed to the device op.  */
+  filename = d + len + 1;
 
-	/* Search backward for the unit number.  */
-	if (isnum(canon[len - 1])) {
-		while (isnum(canon[len - 1]))
-			len--;
+  /* Search backward for the unit number.  */
+  if (isnum(canon[len - 1])) {
+    while (isnum(canon[len - 1])) len--;
 
-		num = strtol(canon + len, 0, 10);
-	}
-	if (unit)
-		*unit = num;
+    num = strtol(canon + len, 0, 10);
+  }
 
-	/* Find the actual device.  */
-	canon[len] = '\0';
-	for (i = 0; i < MAX_DEVICES; i++) {
-		if (dev_list[i] != NULL && !strcmp(canon, dev_list[i]->name)) {
-			if (device)
-				*device = dev_list[i];
+  if (unit)
+    *unit = num;
 
-			return filename;
-		}
-	}
+  /* Find the actual device.  */
+  canon[len] = '\0';
+  for (i = 0; i < MAX_DEVICES; i++) {
+    if (dev_list[i] != NULL && !strcmp(canon, dev_list[i]->name)) {
+      if (device)
+	*device = dev_list[i];
 
-	return (char *)-1;
+      return filename;
+    }
+  }
+
+  return ((char *)-1);
 }
 
 iop_file_t *get_file(int fd)
 {
-	if (fd >= MAX_FILES)
-		return NULL;
+  if (fd >= MAX_FILES)
+    return NULL;
 
-	if (file_table[fd].device != NULL)
-		return &file_table[fd];
+  if (file_table[fd].device != NULL)
+    return &file_table[fd];
 
-	return NULL;
+  return NULL;
 }
 
 iop_file_t *get_new_file(void)
 {
-	int i;
-	iop_file_t *fd = NULL;
-	int oldIntr;
+  int i;
+  iop_file_t *fd = NULL;
+  int oldIntr;
 
-	CpuSuspendIntr(&oldIntr);
+  CpuSuspendIntr(&oldIntr);
 
-	for (i = 0; i < MAX_FILES; i++)
-	{
-		if (!file_table[i].device)
-		{
-			fd = &file_table[i];
+  for (i = 0; i < MAX_FILES; i++)
+  {
+    if (!file_table[i].device)
+    {
+      fd = &file_table[i];
 
-			// fill in "device" temporarily to mark the fd as allocated.
-			fd->device = (iop_device_t *) 0xFFFFFFFF;
-			break;
-		}
-	}
+      // fill in "device" temporarily to mark the fd as allocated.
+      fd->device = (iop_device_t *) 0xFFFFFFFF;
+      break;
+    }
+  }
 
-	CpuResumeIntr(oldIntr);
+  CpuResumeIntr(oldIntr);
 
-	return fd;
+  return fd;
 }
 
 int open(const char *name, int flags, ...)
 {
-	iop_file_t *f = get_new_file();
-	char *filename;
-	va_list alist;
-	int res = -ENOSYS, mode;
+  iop_file_t *f = get_new_file();
+  char *filename;
+  va_list alist;
+  int res = -ENOSYS, mode;
 
-	va_start(alist, flags);
-	mode = va_arg(alist, int);
-	va_end(alist);
+  va_start(alist, flags);
+  mode = va_arg(alist, int);
+  va_end(alist);
 
-	if (!f)
-	{
-		return -EMFILE;
-	}
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
+  if (!f)
+  {
+    return -EMFILE;
+  }
 
-	if ((filename = find_iop_device(name, &f->unit, &f->device)) == (char *)-1)
-	{
-        f->device = NULL;
-		return -ENODEV;
-	}
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+  if ((filename = find_iop_device(name, &f->unit, &f->device)) == ((char *)-1))
+  {
+    f->device = NULL;
+    return -ENODEV;
+  }
 
-	f->mode = flags;
-	if ((res = f->device->ops->open(f, filename, flags, mode)) >= 0)
-	{
-		res = (int)(f - file_table);
-	}
-	else
-	{
-        f->mode = 0;
-        f->device = NULL;
-	}
+  f->mode = flags;
 
-	return res;
+  /* A device's open() gets called, if it returns less than 0, clears
+     file, and returns the return value. */
+  if ((res = f->device->ops->open(f, filename, flags, mode)) < 0)
+  {
+    f->mode = 0;
+    f->device = NULL;
+    return res;
+  }
+
+  res = (int)(f - file_table);
+
+  return res;
 }
 
 int close(int fd)
 {
-	iop_file_t *f;
-	int res;
+  iop_file_t *f;
+  int res;
 
-	if ((f = get_file(fd)) == NULL)
-	{
-		return -EBADF;
-	}
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if ((f = get_file(fd)) == NULL)
+    return -EBADF;
 
-	if (f->mode & 8)
-	{	/* Directory.  */
-		res = f->device->ops->dclose(f);
-	}
-	else
-	{
-		res = f->device->ops->close(f);
-	}
+  /* A device's close() gets called and its return value is returned.
+     The file descriptor is cleared. */
+  if (f->mode & 0x0008)
+  {
+    res = f->device->ops->dclose(f);
+  }
+  else
+  {
+    res = f->device->ops->close(f);
+  }
 
-	f->mode = 0;
-	f->device = NULL;
-	return res;
+  f->mode = 0;
+  f->device = NULL;
+
+  return res;
 }
 
 int read(int fd, void *ptr, int size)
 {
-	iop_file_t *f = get_file(fd);
+  iop_file_t *f = get_file(fd);
 
-	if (f == NULL || !(f->mode & IO_RDONLY))
-		return -EBADF;
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if (f == NULL)
+    return -EBADF;
 
-	return f->device->ops->read(f, ptr, size);
+  /* A device's read() gets called and its return value is returned. */ 
+  return f->device->ops->read(f, ptr, size);
 }
 
 int write(int fd, void *ptr, int size)
 {
-	iop_file_t *f = get_file(fd);
+  iop_file_t *f = get_file(fd);
 
-	if (f == NULL || !(f->mode & IO_WRONLY))
-		return -EBADF;
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if (f == NULL)
+    return -EBADF;
 
-	return f->device->ops->write(f, ptr, size);
+  /* A device's read() gets called and its return value is returned. */ 
+  return f->device->ops->write(f, ptr, size);
 }
 
 int lseek(int fd, int offset, int whence)
 {
-	iop_file_t *f = get_file(fd);
+  iop_file_t *f = get_file(fd);
 
-	if (f == NULL)
-		return -EBADF;
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if (f == NULL)
+    return -EBADF;
 
-	if (whence < IO_SEEK_SET || whence > IO_SEEK_END)
-		return -EINVAL;
+  /* Prints an error here if the whence arg isn't correct. */
+  if (whence < IO_SEEK_SET || whence > IO_SEEK_END)
+    return -EINVAL;
 
-	return f->device->ops->lseek(f, offset, whence);
+  /* A device's lseek() gets called, the return value is returned. */
+  return f->device->ops->lseek(f, offset, whence);
 }
 
 int ioctl(int fd, int cmd, void *arg)
 {
-	iop_file_t *f = get_file(fd);
+  iop_file_t *f = get_file(fd);
 
-	if (f == NULL)
-		return -EBADF;
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if (f == NULL)
+    return -EBADF;
 
-	return f->device->ops->ioctl(f, cmd, arg);
+  /* A device's ioctl() gets called and its return value returned. */
+  return f->device->ops->ioctl(f, cmd, arg);
 }
 
 int remove(const char *name)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
+  
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	return file.device->ops->remove(&file, filename);
+  /* A device's remove() gets called and the return value returned.
+     The file descriptor is cleared. */
+  return f.device->ops->remove(&f, filename);
 }
 
 /* Because mkdir, rmdir, chdir, and sync have similiar arguments (each starts
@@ -319,254 +348,294 @@ int remove(const char *name)
    handle all of them.  */
 static int path_common(const char *name, int arg, int code)
 {
-	iop_file_t file;
-	iop_device_ops_t *dops;
-	char *filename;
+  iop_file_t f;
+  iop_device_ops_t *dops;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	if (code & 0x100)
-		if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-			return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if (code & 0x100)
+    if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+      return -48;
 
-	dops = (iop_device_ops_t *)file.device->ops;
-	switch (code) {
-		case 4:		/* mkdir() */
-			return dops->mkdir(&file, filename, arg);
-		case 5:		/* rmdir() */
-			return dops->rmdir(&file, filename);
-		case 0x103:	/* chdir() */
-			return dops->chdir(&file, filename);
-		case 0x106:
-			return dops->sync(&file, filename, arg);
-	}
+  dops = (iop_device_ops_t *)f.device->ops;
+  switch (code) {
+    case 4:	/* mkdir() */
+      return dops->mkdir(&f, filename, arg);
+    case 5:	/* rmdir() */
+      return dops->rmdir(&f, filename);
+    case 0x103:	/* chdir() */
+      return dops->chdir(&f, filename);
+    case 0x106:	/* sync() */
+      return dops->sync(&f, filename, arg);
+  }
 
-	return -EINVAL;
+  return -EINVAL;
 }
 
 int mkdir(const char *name, int mode)
 {
-	return path_common(name, mode, 4);
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
+
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+
+  /* A device's mkdir() gets called and its return value returned.
+     The file descriptor is cleared. */
+  return path_common(name, mode, 4);
 }
 
 int rmdir(const char *name)
 {
-	return path_common(name, 0, 5);
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
+
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+
+  /* A device's rmdir() gets called and its return value returned.
+     The file descriptor is cleared. */
+  return path_common(name, 0, 5);
 }
 
 int dopen(const char *name)
 {
-	iop_file_t *f = get_new_file();
-	char *filename;
-	int res;
+  iop_file_t *f = get_new_file();
+  char *filename;
+  int res;
 
-	if (!f)
-		return -EMFILE;
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
+  if (!f)
+    return -EMFILE;
 
-	if ((filename = find_iop_device(name, &f->unit, &f->device)) == (char *)-1)
-	{
-        f->device = NULL;
-		return -ENODEV;
-	}
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+  if ((filename = find_iop_device(name, &f->unit, &f->device)) == ((char *)-1))
+  {
+    f->device = NULL;
+    return -ENODEV;
+  }
 
-	f->mode = 8;	/* Indicates a directory.  */
-	if ((res = f->device->ops->dopen(f, filename)) >= 0)
-		res = (int)(f - file_table);
-	else
-	{
-        f->mode = 0;
-        f->device = NULL;
-	}
+  /* Indicates a directory. */
+  f->mode = 0x0008;
+  if ((res = f->device->ops->dopen(f, filename)) >= 0)
+    res = (int)(f - file_table);
+  else
+  {
+    f->mode = 0;
+    f->device = NULL;
+  }
 
-	return res;
+  return res;
 }
 
-int dread(int fd, io_dirent_t *io_dirent)
+int dread(int fd, io_dirent_t *buf)
 {
-    iop_file_t *f = get_file(fd);
-    int res;
+  iop_file_t *f = get_file(fd);
 
-    if (f == NULL ||  !(f->mode & 8))
-            return -EBADF;
+  /* Finds the file in the file table, if it can't find it,
+     returns -EBADF. */
+  if (f == NULL ||  !(f->mode & 0x0008))
+    return -EBADF;
 
-    res = f->device->ops->dread(f, io_dirent);
-
-    return res;
+  /* A device's dread() gets called and the return value returned. */
+  return f->device->ops->dread(f, buf);
 }
 
 int getstat(const char *name, io_stat_t *stat)
 {
-	iop_file_t file;
-	char *filename;
-	int res;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
 
-	res = file.device->ops->getstat(&file, filename, stat);
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
 
-	return res;
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
+
+  /* A device's getstat() gets called and the return value returned.
+     The file descriptor is cleared. */
+  return f.device->ops->getstat(&f, filename, stat);
 }
 
 int chstat(const char *name, io_stat_t *stat, unsigned int mask)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
 
-	/* If this is a legacy device (such as mc:) then we need to convert the mode
-	   variable to iomanX's extended format.  */
-	//if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-	//	stat->mode = modex2mode(stat->mode);
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-    return file.device->ops->chstat(&file, filename, stat, mask);
+  /* A device's chstat() gets called and the return value returned.
+     The file descriptor is cleared. */
+  return f.device->ops->chstat(&f, filename, stat, mask);
 }
 
 int format(const char *dev, const char *blockdev, void *arg, int arglen)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(dev, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  /* Uses a file descriptor, if it can't open a file descriptor,
+     returns -EMFILE. */
 
-	return file.device->ops->format(&file, filename, blockdev, arg, arglen);
+  /* Finds the file's device, if it can't find the device (-1),
+     returns -ENODEV. */
+  if ((filename = find_iop_device(dev, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
+
+  /* A device's format() gets called and the return value returned.
+     The file descriptor is cleared. */
+  return f.device->ops->format(&f, filename, blockdev, arg, arglen);
 }
 
 static int link_common(const char *old, const char *new, int code)
 {
-	iop_file_t file;
-	iop_device_t *new_device;
-	char *filename, *new_filename = (char *)new;
-	int new_unit;
+  iop_file_t f;
+  iop_device_t *new_device;
+  char *filename, *new_filename = (char *)new;
+  int new_unit;
 
-	if ((filename = find_iop_device(old, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(old, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	/* Make sure the user isn't attempting to link across devices.  */
-	if (index(new, ':') != NULL) {
-		new_filename = find_iop_device(new, &new_unit, &new_device);
-		if ((new_filename == (char *)-1) || (new_unit != file.unit) ||
-				(new_device != file.device))
-			return -ENXIO;
-	}
+  /* Make sure the user isn't attempting to link across devices.  */
+  if (index(new, ':') != NULL) {
+    new_filename = find_iop_device(new, &new_unit, &new_device);
+    if ((new_filename == ((char *)-1)) || (new_unit != f.unit) ||
+	(new_device != f.device))
+      return -ENXIO;
+  }
 
-	/* The filesystem must support these ops.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	if (code == 7)	/* rename() */
-		return file.device->ops->rename(&file, filename, new_filename);
+  /* rename() */
+  if (code == 7)
+    return f.device->ops->rename(&f, filename, new_filename);
 
-	return file.device->ops->symlink(&file, filename, new_filename);
+  return f.device->ops->symlink(&f, filename, new_filename);
 }
 
 int rename(const char *old, const char *new)
 {
-	return link_common(old, new, 7);
+  return link_common(old, new, 7);
 }
 
 int chdir(const char *name)
 {
-	return path_common(name, 0, 0x103);
+  return path_common(name, 0, 0x103);
 }
 
 int sync(const char *dev, int flag)
 {
-	return path_common(dev, flag, 0x106);
+  return path_common(dev, flag, 0x106);
 }
 
 int mount(const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(fsname, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(fsname, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	/* The filesystem must support these ops.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	return file.device->ops->mount(&file, filename, devname, flag, arg, arglen);
+  return f.device->ops->mount(&f, filename, devname, flag, arg, arglen);
 }
 
 int umount(const char *fsname)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(fsname, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(fsname, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	/* The filesystem must support these ops.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	return file.device->ops->umount(&file, filename);
+  return f.device->ops->umount(&f, filename);
 }
 
 long long lseek64(int fd, long long offset, int whence)
 {
-	iop_file_t *f = get_file(fd);
+  iop_file_t *f = get_file(fd);
 
-	if (f == NULL)
-		return -EBADF;
+  if (f == NULL)
+    return -EBADF;
 
-	if (whence < IO_SEEK_SET || whence > IO_SEEK_END)
-		return -EINVAL;
+  if (whence < IO_SEEK_SET || whence > IO_SEEK_END)
+    return -EINVAL;
 
-	if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f->device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	return f->device->ops->lseek64(f, offset, whence);
+  return f->device->ops->lseek64(f, offset, whence);
 }
 
-int devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int devctl(const char *name, int cmd, void *arg, unsigned int arglen,
+	    void *buf, unsigned int buflen)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	/* The filesystem must support these ops.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	return file.device->ops->devctl(&file, filename, cmd, arg, arglen, buf, buflen);
+  return f.device->ops->devctl(&f, filename, cmd, arg, arglen, buf, buflen);
 }
 
 int symlink(const char *old, const char *new)
 {
-	return link_common(old, new, 8);
+  return link_common(old, new, 8);
 }
 
 int readlink(const char *name, char *buf, unsigned int buflen)
 {
-	iop_file_t file;
-	char *filename;
+  iop_file_t f;
+  char *filename;
 
-	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
-		return -ENODEV;
+  if ((filename = find_iop_device(name, &f.unit, &f.device)) == ((char *)-1))
+    return -ENODEV;
 
-	/* The filesystem must support these ops.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		return -48;
+  /** This test invalidates any modules not using fileXio. */
+  if ((f.device->type & 0xf0000000) != FILEXIO_DT_FSEXT)
+    return -48;
 
-	return file.device->ops->readlink(&file, filename, buf, buflen);
+  return f.device->ops->readlink(&f, filename, buf, buflen);
 }
 
 
-int ioctl2(int fd, int command, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int ioctl2(int fd, int command, void *arg, unsigned int arglen, void *buf,
+	    unsigned int buflen)
 {
-	iop_file_t *f;
+  iop_file_t *f;
 
-	if ((f = get_file(fd)) == NULL)
-		return -EBADF;
+  if ((f = get_file(fd)) == NULL)
+    return -EBADF;
 
-	return f->device->ops->ioctl2(f, command, arg, arglen, buf, buflen);
+  return f->device->ops->ioctl2(f, command, arg, arglen, buf, buflen);
 }

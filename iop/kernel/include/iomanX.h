@@ -31,8 +31,9 @@
 #define IOP_DT_RAW	0x08
 #define IOP_DT_FS	0x10
 #ifndef IOMAN_NO_EXTENDED
-/** Supports calls after chstat().  */
-#define IOP_DT_FSEXT	0x10000000
+
+/** Supports calls after chstat() using fileXio.  */
+#define FILEXIO_DT_FSEXT	0x10000000
 #endif
 
 /** File objects passed to driver operations.  */

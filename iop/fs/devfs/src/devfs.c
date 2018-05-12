@@ -1018,7 +1018,7 @@ int init_devfs(void)
    memset(open_dirfiles, 0, sizeof(directory_file_t) * MAX_OPEN_DIRFILES);
 
    devfs_device.name = "devfs";
-   devfs_device.type = IOP_DT_FS | IOP_DT_FSEXT;
+   devfs_device.type = IOP_DT_FS | FILEXIO_DT_FSEXT;
    devfs_device.version = 0x100;
    devfs_device.desc = "PS2 Device FS Driver";
    devfs_device.ops = &devfs_ops;

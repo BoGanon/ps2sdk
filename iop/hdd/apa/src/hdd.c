@@ -65,7 +65,7 @@ static iop_device_ops_t hddOps={
 };
 static iop_device_t hddFioDev={
 	"hdd",
-	IOP_DT_BLOCK | IOP_DT_FSEXT,
+	IOP_DT_BLOCK | FILEXIO_DT_FSEXT,
 	1,
 	"HDD",
 	(struct _iop_device_ops *)&hddOps,

@@ -140,7 +140,7 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer)
     {
       if (devinfo_table[i])
         /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
-        if ((devinfo_table[i]->type & IOP_DT_FSEXT) && (devinfo_table[i]->type & devtype))
+        if ((devinfo_table[i]->type & FILEXIO_DT_FSEXT) && (devinfo_table[i]->type & devtype))
         {
           strcpy(bufptr,devinfo_table[i]->name);
           bufptr += strlen(bufptr)+1;

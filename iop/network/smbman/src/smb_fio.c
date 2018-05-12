@@ -58,7 +58,7 @@ void *smbman_ops[27] = {
 // driver descriptor
 static iop_ext_device_t smbdev = {
 	"smb",
-	IOP_DT_FS  | IOP_DT_FSEXT,
+	IOP_DT_FS  | FILEXIO_DT_FSEXT,
 	1,
 	"SMB",
 	(struct _iop_ext_device_ops *)&smbman_ops

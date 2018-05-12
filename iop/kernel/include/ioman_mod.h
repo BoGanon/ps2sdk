@@ -11,7 +11,7 @@
 
 /**
  * @file
- * IOMAN definitions and imports.
+ * Hooked IOMAN definitions and imports when using IOMANX.
  */
 
 #ifndef __IOMAN_MOD_H__
@@ -34,7 +34,7 @@ int io_mkdir(const char *path);
 int io_rmdir(const char *path);
 int io_dopen(const char *path, int mode);
 int io_dclose(int fd);
-int io_dread(int fd, io_dirent_t *buf);
+int io_dread(int fd, fio_dirent_t *buf);
 int io_getstat(const char *name, io_stat_t *stat);
 int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 int io_format(const char *dev);
@@ -84,7 +84,7 @@ typedef struct _iop_io_device_ops {
 	int	(*io_rmdir)(iop_io_file_t *, const char *);
 	int	(*io_dopen)(iop_io_file_t *, const char *);
 	int	(*io_dclose)(iop_io_file_t *);
-	int	(*io_dread)(iop_io_file_t *, io_dirent_t *);
+	int	(*io_dread)(iop_io_file_t *, fio_dirent_t *);
 	int	(*io_getstat)(iop_io_file_t *, const char *, io_stat_t *);
 	int	(*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_io_device_ops_t;

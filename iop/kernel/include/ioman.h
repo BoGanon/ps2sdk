@@ -34,7 +34,7 @@ int mkdir(const char *path);
 int rmdir(const char *path);
 int dopen(const char *path, int mode);
 int dclose(int fd);
-int dread(int fd, io_dirent_t *buf);
+int dread(int fd, fio_dirent_t *buf);
 int getstat(const char *name, io_stat_t *stat);
 int chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 int format(const char *dev);
@@ -84,7 +84,7 @@ typedef struct _iop_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, io_dirent_t *);
+	int	(*dread)(iop_file_t *, fio_dirent_t *);
 	int	(*getstat)(iop_file_t *, const char *, io_stat_t *);
 	int	(*chstat)(iop_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_device_ops_t;

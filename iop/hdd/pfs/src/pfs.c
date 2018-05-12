@@ -68,7 +68,7 @@ iop_device_ops_t pfsOps = {
 
 iop_device_t pfsFioDev = {
 	"pfs",
-	(IOP_DT_FS | IOP_DT_FSEXT),
+	(IOP_DT_FS | FILEXIO_DT_FSEXT),
 	1,
 	"PFS",
 	&pfsOps
