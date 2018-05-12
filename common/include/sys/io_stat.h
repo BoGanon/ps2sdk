@@ -20,17 +20,20 @@
     @{
 */
 
-/** Chstat mask */
-#define IO_CST_MODE		0x0001
-#define IO_CST_ATTR		0x0002
-#define IO_CST_SIZE		0x0004
-#define IO_CST_CT		0x0008
-#define IO_CST_AT		0x0010
-#define IO_CST_MT		0x0020
-#define IO_CST_PRVT		0x0040
+/**	These are the partition filesystem types stored in stat.mode when
+	reading the "hdd0:" directory.
+*/
+#define	IO_FSTYPE_EXT2		0x0083
+#define	IO_FSTYPE_EXT2_SWAP	0x0082
+#define	IO_FSTYPE_PFS		0x0100
+#define	IO_FSTYPE_EMPTY		0x0000
 
-/** Umask */
-#define IO_S_UMSK		0200000
+/**	These are used for filesystems with advanced file
+	attributes or permissions.
+
+	Add to this list any known devices that use these attributes.
+	Known device list: pfs
+*/
 
 /** File types */
 #define IO_S_IFMT		070000
@@ -73,17 +76,17 @@
 #define IO_S_ISREG(m)	(((m) & IO_S_IFMT) == IO_S_IFREG)
 #define IO_S_ISDIR(m)	(((m) & IO_S_IFMT) == IO_S_IFDIR)
 
-/** @warning These are used for filesystems without advanced file
-	     attributes or permissions.
-	     FAT, memory cards, etc.
+/**	These are used for filesystems without advanced file
+	attributes or permissions.
+	FAT, memory cards, etc.
 
-	     Add to this list any known devices that use simple attributes.
-	     Known device list: mc
-	                        mass (usbhdfsd)
-	                        sd (iEEE1394_disk)
-	                        smb (smbman)
-	                        devfs (devfs)
-	                        host (depends on implementation)
+	Add to this list any known devices that use these attributes.
+	Known device list: mc
+	                   mass (usbhdfsd)
+	                   sd (iEEE1394_disk)
+	                   smb (smbman)
+	                   devfs (devfs)
+	                   host (depends on implementation)
 */
 
 #define IO_MC_IFMT		0x0030
@@ -98,6 +101,15 @@
 
 #define IO_MC_ISREG(m)	(((m) & IO_MC_IFMT) == IO_MC_IFREG)
 #define IO_MC_ISDIR(m)	(((m) & IO_MC_IFMT) == IO_MC_IFDIR)
+
+/** The field to be changed in Chstat. */
+#define IO_CST_MODE		0x0001
+#define IO_CST_ATTR		0x0002
+#define IO_CST_SIZE		0x0004
+#define IO_CST_CT		0x0008
+#define IO_CST_AT		0x0010
+#define IO_CST_MT		0x0020
+#define IO_CST_PRVT		0x0040
 
 typedef struct {
 	unsigned int	mode;
@@ -122,6 +134,33 @@ typedef struct {
 	char		name[256];
 	unsigned int	private_0;
 } io_dirent_t;
+
+
+/** These are used for compatibility with memorycards and filesystem
+    modules that don't use the above dirent type. */
+
+typedef struct {
+	unsigned int	mode;
+	unsigned int	attr;
+	unsigned int	size;
+	unsigned char	ctime[8];
+	unsigned char	atime[8];
+	unsigned char	mtime[8];
+	unsigned int	hisize;
+} fio_stat_t;
+
+typedef struct {
+	fio_stat_t	stat;
+	char		name[256];
+	unsigned int	private_0;
+	unsigned int	unused[6];
+} fio_dirent_t;
+
+typedef struct {
+	fio_stat_t	stat;
+	char		name[256];
+	unsigned int	private_0;
+} internal_dirent_t;
 
 /** End of addtogroup fileio
  *  @}

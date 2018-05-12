@@ -33,8 +33,8 @@
 #define IO_SEEK_CUR	1
 #define IO_SEEK_END	2
 
-/** @warning Internal pfs use only */
-#define IO_DIROPEN	000010
+/** @warning Internal use only */
+#define IO_DIROPEN	0x0008
 
 /** End of addtogroup fileio
  *  @}
