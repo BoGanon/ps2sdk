@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <tamtypes.h>
-#include <errno.h>
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
@@ -19,11 +18,16 @@
 #include <iopheap.h>
 #include <malloc.h>
 
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
+
 // PS2DRV includes
 #include "sys/io_mount.h"
 #include "sys/libhdd_ioctl.h"
 #include "fileXio_rpc.h"
-#include "errno.h"
 
 #include "libhdd.h"
 

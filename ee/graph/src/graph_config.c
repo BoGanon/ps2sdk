@@ -1,9 +1,14 @@
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
 
 #include <graph.h>
 #include <graph_config.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flicker_filter, char *config)
 {
@@ -11,7 +16,6 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	// Save the current mode value.
 	switch (mode)
 	{
-
 		case GRAPH_MODE_NTSC:			sprintf(config, "GRAPH_MODE_NTSC:");		break;
 		case GRAPH_MODE_PAL:			sprintf(config, "GRAPH_MODE_PAL:");			break;
 		case GRAPH_MODE_HDTV_480P:		sprintf(config, "GRAPH_MODE_HDTV_480P:");	break;

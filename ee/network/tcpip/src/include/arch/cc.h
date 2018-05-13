@@ -2,6 +2,10 @@
 #define __CC_H__
 
 #include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 #include <stddef.h>
 
 #define BYTE_ORDER LITTLE_ENDIAN

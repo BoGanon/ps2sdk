@@ -11,11 +11,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <kernel.h>
 #include <libgs.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 #include "internal.h"
 

@@ -8,10 +8,15 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include <errno.h>
 #include <stdio.h>
 #include <kernel.h>
 #include <libgs.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 #include "internal.h"
 

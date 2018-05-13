@@ -1,10 +1,15 @@
-#include <errno.h>
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
 #include <malloc.h>
 #include <netman.h>
 #include <netman_rpc.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 #include "rpc_client.h"
 

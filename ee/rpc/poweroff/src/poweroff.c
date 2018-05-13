@@ -10,13 +10,18 @@
 
 #include "libpwroff.h"
 
-#include <errno.h>
 #include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
 #include <pwroff_rpc.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 extern void *_gp;
 

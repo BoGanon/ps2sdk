@@ -10,11 +10,16 @@
 */
 
 #include <tamtypes.h>
-#include <errno.h>
 #include <kernel.h>
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <stdio.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 #include "libpwroff.h"
 

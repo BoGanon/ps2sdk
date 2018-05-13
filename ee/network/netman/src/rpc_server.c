@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <kernel.h>
 #include <malloc.h>
 #include <sifcmd.h>
@@ -7,6 +6,12 @@
 #include <string.h>
 #include <netman.h>
 #include <netman_rpc.h>
+
+#include <errno.h>
+#ifdef errno
+#undef errno
+#endif
+extern int errno;
 
 #include "internal.h"
 #include "rpc_server.h"
