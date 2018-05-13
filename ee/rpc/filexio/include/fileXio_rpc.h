@@ -48,7 +48,7 @@ int fileXioGetDeviceList(struct fileXioDevice deviceEntry[], unsigned int req_en
 int fileXioGetdir(const char* pathname, struct fileXioDirEntry DirEntry[], unsigned int req_entries);
 int fileXioMount(const char* mountpoint, const char* blockdev, int flag);
 int fileXioUmount(const char* mountpoint);
-int fileXioCopyfile(const char* source, const char* dest, int mode);
+int fileXioCopyfile(const char* source, const char* dest);
 int fileXioMkdir(const char* pathname, int mode);
 int fileXioRmdir(const char* pathname);
 int fileXioRemove(const char* pathname);

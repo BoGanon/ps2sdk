@@ -54,7 +54,7 @@ static fxio_rests_pkt rests;
 
 /* RPC exported functions */
 static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount);
-static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode);
+static int fileXio_CopyFile_RPC(const char *src, const char *dest);
 static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data);
 static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,u8 *misbuf);
 static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries);
@@ -97,7 +97,7 @@ static void* fileXioRpc_Dread(unsigned int* sbuff);
 static void* fileXioRpc_Dclose(unsigned int* sbuff);
 static void* filexioRpc_SetRWBufferSize(void *sbuff);
 static void* fileXioRpc_Getdir(unsigned int* sbuff);
-static void DirEntryCopy(struct fileXioDirEntry* dirEntry, io_dirent_t* internalDirEntry);
+static void DirEntryCopy(int big, struct fileXioDirEntry* dirEntry, void* internalDirEntry);
 
 // RPC server
 static void* fileXio_rpc_server(int fno, void *data, int size);
@@ -160,22 +160,75 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
     return device_count;
 }
 
-static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
+int is_mc_mode(const char *path)
 {
-  io_stat_t stat;
+  if ((path[0] == 'p') && (path[1] == 'f') && (path[2] == 's'))
+    return 0;
+  if ((path[0] == 'h') && (path[1] == 'd') && (path[2] == 'd'))
+    return 0;
+
+  return 1;
+}
+
+int is_fio_dirent(const char *path)
+{
+  if ((path[0] == 'm') && (path[1] == 'c'))
+    return 1;
+
+  return 0;
+}
+
+int convert_mc_mode(int mode)
+{
+	int pfs_mode = 0;
+
+	/* Convert the file access modes, but make sure directories have sane
+	   permissions. A copy of the original mode gets stored into the attr
+	   field anyway. Also, write and execute should only be set for the
+	   user. */
+
+	if (IO_MC_ISREG(mode))
+		pfs_mode |= IO_S_IFREG;
+	if (IO_MC_ISDIR(mode)) {
+		pfs_mode |= IO_S_IFDIR;
+		pfs_mode |= IO_S_IXALL;
+	}
+
+	if (mode & IO_MC_R)
+		pfs_mode |= IO_S_IRALL;
+	if (mode & IO_MC_W)
+		pfs_mode |= IO_S_IWUSR;
+	if ((mode & IO_MC_X) && IO_S_ISREG(pfs_mode))
+		pfs_mode |= IO_S_IXUSR;
+
+	/* A normal file should be 0644 by here. */
+	/* A normal directory should be 0755 by here. */
+
+	return pfs_mode;
+}
+
+static int fileXio_CopyFile_RPC(const char *src, const char *dest)
+{
+  io_stat_t stat_src, stat_dest;
+
   int infd, outfd, size, remain, i, retval = 0;
+
+  retval = getstat(src,&stat_src);
+
 
   if ((infd = open(src, IO_RDONLY, 0666)) < 0) {
     return infd;
   }
+
   if ((outfd = open(dest, IO_RDWR|IO_CREAT|IO_TRUNC, 0666)) < 0) {
     close(infd);
     return outfd;
   }
+
   size = lseek(infd, 0, IO_SEEK_END);
   lseek(infd, 0, IO_SEEK_SET);
   if (!size)
-    return retval;
+    return size;
 
   remain = size % RWBufferSize;
   for (i = 0; i < (size / RWBufferSize); i++) {
@@ -187,8 +240,29 @@ static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
   close(infd);
   close(outfd);
 
-  stat.mode = mode;
-  chstat(dest, &stat, 1);
+  /* Copy the file mode if the src file mode is good. */
+  if (retval >= 0) {
+    /* Device drivers emulate MC mode attributes so convert the mode to
+       PFS attributes. */
+    if ((dest[0] == 'p') && (dest[1] == 'f') && (dest[2] == 's')) {
+      if (is_mc_mode(src)) {
+	stat_dest.mode = convert_mc_mode(stat_src.mode);
+	stat_dest.attr = stat_src.mode;
+      
+	chstat(dest, &stat_dest, IO_CST_MODE|IO_CST_ATTR);
+      }
+    }
+    /* Only convert the mode for mc from pfs which stores a MC compatible mode
+       in the stat.attr field. */
+    if ((dest[0] == 'm') && (dest[1] == 'c')) {
+      if ((src[0] == 'p') && (src[1] == 'f') && (src[2] == 's'))
+	stat_dest.mode = stat_src.attr;
+      else
+	stat_dest.mode = stat_src.mode;
+
+      chstat(dest, &stat_dest, IO_CST_MODE);
+    }
+  }
 
   return size;
 }
@@ -332,14 +406,13 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 	return (total);
 }
 
-
 // This is the getdir for use by the EE RPC client
 // It DMA's entries to the specified buffer in EE memory
 static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries)
 {
 	int matched_entries;
-      int fd, res;
-  	io_dirent_t dirbuf;
+	int fd, res, fio;
+	char dirbuf[324];
 	struct fileXioDirEntry localDirEntry;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 	struct t_SifDmaTransfer dmaStruct;
@@ -354,48 +427,51 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 
 	matched_entries = 0;
 
-      fd = dopen(pathname);
-      if (fd <= 0)
-      {
-        return fd;
-      }
+  
+	fd = dopen(pathname);
+	if (fd <= 0)
+	{
+	  return fd;
+	}
+
+	fio = is_fio_dirent(pathname);
+
+	res = 1;
+	while (res > 0)
 	{
 
-        res = 1;
-        while (res > 0)
-        {
-          memset(&dirbuf, 0, sizeof(dirbuf));
-          res = dread(fd, &dirbuf);
+	  memset(dirbuf, 0, 324);
+
+	  res = dread(fd, (void*)&dirbuf);
           if (res > 0)
           {
-		// check for too many entries
-		if (matched_entries == req_entries)
-		{
-			close(fd);
-			return (matched_entries);
-		}
-		// wait for any previous DMA to complete
-	      // before over-writing localDirEntry
-	      while(SifDmaStat(dmaID)>=0);
-            DirEntryCopy(&localDirEntry, &dirbuf);
-	      // DMA localDirEntry to the address specified by dirEntry[matched_entries]
-	      // setup the dma struct
-	      dmaStruct.src = &localDirEntry;
-	      dmaStruct.dest = &dirEntry[matched_entries];
-	      dmaStruct.size = sizeof(struct fileXioDirEntry);
-	      dmaStruct.attr = 0;
-	      // Do the DMA transfer
-	      CpuSuspendIntr(&intStatus);
-	      dmaID = SifSetDma(&dmaStruct, 1);
-	      CpuResumeIntr(intStatus);
-  	      matched_entries++;
+	    // check for too many entries
+	    if (matched_entries == req_entries)
+	    {
+	      close(fd);
+	      return (matched_entries);
+	    }
+
+	    // wait for any previous DMA to complete
+	    // before over-writing localDirEntry
+	    while(SifDmaStat(dmaID)>=0);
+	    DirEntryCopy(fio, &localDirEntry, &dirbuf);
+	    // DMA localDirEntry to the address specified by dirEntry[matched_entries]
+	    // setup the dma struct
+	    dmaStruct.src = &localDirEntry;
+	    dmaStruct.dest = &dirEntry[matched_entries];
+	    dmaStruct.size = sizeof(struct fileXioDirEntry);
+	    dmaStruct.attr = 0;
+	    // Do the DMA transfer
+	    CpuSuspendIntr(&intStatus);
+	    dmaID = SifSetDma(&dmaStruct, 1);
+	    CpuResumeIntr(intStatus);
+	    matched_entries++;
           } // if res
         } // while
 
-      } // if dirs and files
-
-      // cleanup and return # of entries
-      close(fd);
+	// cleanup and return # of entries
+	close(fd);
 	return (matched_entries);
 }
 
@@ -452,18 +528,18 @@ static int fileXio_getstat_RPC(char *filename, void* eeptr)
 static int fileXio_dread_RPC(int fd, void* eeptr)
 {
       int res=0;
-	io_dirent_t localDir;
+      io_dirent_t localDir;
       struct t_SifDmaTransfer dmaStruct;
       int intStatus;	// interrupt status - for dis/en-abling interrupts
 
-	res = dread(fd, &localDir);
+      res = dread(fd, (void*)&localDir);
       if (res > 0)
       {
 	  // DMA localStat to the address specified by eeptr
 	  // setup the dma struct
 	  dmaStruct.src = &localDir;
 	  dmaStruct.dest = eeptr;
-	  dmaStruct.size = 64+256;
+	  dmaStruct.size = IO_DIRENT_SIZE;
 	  dmaStruct.attr = 0;
 	  // Do the DMA transfer
 	  CpuSuspendIntr(&intStatus);
@@ -563,8 +639,7 @@ static void* fileXioRpc_CopyFile(unsigned int* sbuff)
 
 	ret=fileXio_CopyFile_RPC(
 		packet->source,		// source filename
-		packet->dest,		// dest filename
-		packet->mode		// mode
+		packet->dest		// dest filename
 		);
 
 	sbuff[0] = ret;
@@ -1143,10 +1218,23 @@ static void* fileXio_rpc_server(int fno, void *data, int size)
 
 
 // Copy a DIR Entry from the native format to our format
-static void DirEntryCopy(struct fileXioDirEntry* dirEntry, io_dirent_t* internalDirEntry)
+static void DirEntryCopy(int fio, struct fileXioDirEntry* dirEntry, void* internalDirEntry)
 {
-	dirEntry->fileSize = internalDirEntry->stat.size;
-	dirEntry->fileProperties = internalDirEntry->stat.attr;
-	strncpy(dirEntry->filename,internalDirEntry->name,127);
-	dirEntry->filename[127] = '\0';
+	io_dirent_t *io_dir;
+	fio_dirent_t *fio_dir;
+
+	if (fio) {
+	    fio_dir = (fio_dirent_t*)internalDirEntry;
+	    dirEntry->fileSize = fio_dir->stat.size;
+	    dirEntry->fileProperties = fio_dir->stat.attr;
+	    strncpy(dirEntry->filename,fio_dir->name,127);
+	    dirEntry->filename[127] = '\0';
+	}
+	else {
+	    io_dir = (io_dirent_t*)internalDirEntry;
+	    dirEntry->fileSize = io_dir->stat.size;
+	    dirEntry->fileProperties = io_dir->stat.attr;
+	    strncpy(dirEntry->filename,io_dir->name,127);
+	    dirEntry->filename[127] = '\0';
+	}
 }

@@ -130,7 +130,6 @@ struct fxio_unmount_packet {
 struct fxio_copyfile_packet {
 	char source[512];
 	char dest[512];
-	int mode;
 };
 
 struct fxio_mkdir_packet {
