@@ -164,7 +164,8 @@ int devfs_fill_dirent(io_dirent_t *dirent, int devno)
 
         if(subdev_loop < DEVFS_MAX_SUBDEVS)
         {
-           memset(dirent, 0, sizeof(io_dirent_t));
+           /* Unsafe, not our dirent. */
+           memset(dirent, 0, IO_DIRENT_SIZE);
            dirent->stat.size = dev_scan->subdevs[subdev_loop].extent.loc32[0];
            dirent->stat.hisize = dev_scan->subdevs[subdev_loop].extent.loc32[1];
            dirent->stat.mode = IO_MC_IFREG;

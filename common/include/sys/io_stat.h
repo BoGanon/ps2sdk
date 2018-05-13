@@ -21,8 +21,9 @@
 */
 
 /**	These are the partition filesystem types stored in stat.mode when
-	reading the "hdd0:" directory.
+	reading "hdd0:" as a directory.
 */
+
 #define	IO_FSTYPE_EXT2		0x0083
 #define	IO_FSTYPE_EXT2_SWAP	0x0082
 #define	IO_FSTYPE_PFS		0x0100
@@ -111,6 +112,8 @@
 #define IO_CST_MT		0x0020
 #define IO_CST_PRVT		0x0040
 
+#define IO_DIRENT_SIZE 320
+
 typedef struct {
 	unsigned int	mode;
 	unsigned int	attr;
@@ -132,12 +135,14 @@ typedef struct {
 typedef struct {
 	io_stat_t	stat;
 	char		name[256];
-	unsigned int	private_0;
+	unsigned int	private_0; /* Restricted after being used. */
 } io_dirent_t;
 
 
 /** These are used for compatibility with memorycards and filesystem
     modules that don't use the above dirent type. */
+
+#define FIO_DIRENT_SIZE 296
 
 typedef struct {
 	unsigned int	mode;
@@ -149,18 +154,13 @@ typedef struct {
 	unsigned int	hisize;
 } fio_stat_t;
 
+/* I believe there may be another restricted private member at unused[5]. */
 typedef struct {
 	fio_stat_t	stat;
 	char		name[256];
-	unsigned int	private_0;
+	unsigned int	private_0; /* Restricted after being used. */
 	unsigned int	unused[6];
 } fio_dirent_t;
-
-typedef struct {
-	fio_stat_t	stat;
-	char		name[256];
-	unsigned int	private_0;
-} internal_dirent_t;
 
 /** End of addtogroup fileio
  *  @}

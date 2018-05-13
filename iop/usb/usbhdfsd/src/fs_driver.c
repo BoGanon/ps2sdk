@@ -664,11 +664,11 @@ static int fs_dread(iop_file_t *fd, io_dirent_t *buffer)
 	if (rec->status >= 0)
 	{
 #ifdef USE_IOMAN
-		memset(buffer, 0, sizeof(internal_dirent_t));
+		memset(buffer, 0, FIO_DIRENT_SIZE);
 #else
-		memset(buffer, 0, sizeof(io_dirent_t));
+		memset(buffer, 0, IO_DIRENT_SIZE);
 #endif
-		fillStat(&buffer->stat, &rec->current_fatdir);
+		fillStat((void*)&buffer->stat, &rec->current_fatdir);
 		strcpy(buffer->name, (const char*)rec->current_fatdir.name);
 	}
 

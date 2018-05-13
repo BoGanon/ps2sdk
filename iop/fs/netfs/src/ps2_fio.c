@@ -1154,7 +1154,7 @@ static int ps2netfs_op_dread(char *buf, int len)
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
   {
-    retval = io_dread(fdptr->realfd,(fio_dirent_t*)dreadrly->buf);
+    retval = io_dread(fdptr->realfd,(void*)dreadrly->buf);
   }
 
   // Build packet
