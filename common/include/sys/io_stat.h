@@ -16,12 +16,10 @@
 #ifndef SYS_IO_STAT_H
 #define SYS_IO_STAT_H
 
-/** @addtogroup fileio
-    @{
-*/
-
-/**	These are the partition filesystem types stored in stat.mode when
-	reading "hdd0:" as a directory.
+/** @addtogroup fio_stat File I/O file modes and types
+ *  @{
+ *
+ *  @details The values needed for various file I/O operations.
 */
 
 #define	IO_FSTYPE_EXT2		0x0083
@@ -113,7 +111,16 @@
 #define IO_CST_PRVT		0x0040
 
 #define IO_DIRENT_SIZE 320
+#define FIO_DIRENT_SIZE 296
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** This is the stat type used by updated devices.
+ *
+ * @attention Don't use with memory cards.
+ */
 typedef struct {
 	unsigned int	mode;
 	unsigned int	attr;
@@ -132,18 +139,21 @@ typedef struct {
 	unsigned int	private_5;
 } io_stat_t;
 
+/** This is the dirent type used by updated devices.
+ *
+ *  @attention Don't use with memory cards.
+ */
 typedef struct {
 	io_stat_t	stat;
 	char		name[256];
-	unsigned int	private_0; /* Restricted after being used. */
+	unsigned int	private_0; /** Restricted after being used. */
 } io_dirent_t;
 
-
-/** These are used for compatibility with memorycards and filesystem
-    modules that don't use the above dirent type. */
-
-#define FIO_DIRENT_SIZE 296
-
+/** This is the stat type used by memory cards and older drivers.
+ *
+ * @attention Only use with memory cards or device drivers that do not use
+ *            the latest types.
+ */
 typedef struct {
 	unsigned int	mode;
 	unsigned int	attr;
@@ -154,15 +164,23 @@ typedef struct {
 	unsigned int	hisize;
 } fio_stat_t;
 
-/* I believe there may be another restricted private member at unused[5]. */
+/** This is the dirent type used by memory cards and older drivers.
+ *
+ * @attention Only use with memory cards or device drivers that do not use
+ *            the latest types.
+ */
 typedef struct {
 	fio_stat_t	stat;
 	char		name[256];
-	unsigned int	private_0; /* Restricted after being used. */
-	unsigned int	unused[6];
+	unsigned int	private_0; /** Restricted after being used. */
+	unsigned int	unused[6]; /** unused[5] may also be the same. */
 } fio_dirent_t;
 
-/** End of addtogroup fileio
+#ifdef __cplusplus
+}
+#endif
+
+/** End of addtogroup fio_stat
  *  @}
  */
 

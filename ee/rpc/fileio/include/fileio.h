@@ -67,6 +67,7 @@ int fioDclose(int fd);
 int fioDread(int fd, io_dirent_t *buf);
 /** @warning Unstable; does not suspend interrupts prior to performing DMA
              transfers on the IOP side. */
+int fioDreadMC(int fd, fio_dirent_t *buf);
 int fioGetstat(const char *name, io_stat_t *buf);
 int fioChstat(const char *name, io_stat_t *buf, unsigned int cbit);
 /** @warning Falls through to the next case (mkdir) upon completion. */

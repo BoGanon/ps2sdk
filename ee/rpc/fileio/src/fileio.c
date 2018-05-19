@@ -215,7 +215,6 @@ int fioOpen(const char *name, int mode)
 		result=res;
 	}
 
-
 	return result;
 }
 #endif
@@ -650,7 +649,7 @@ struct _fio_dread_arg {
 		int fd;
 		int result;
 	} p;
-	io_dirent_t *buf;
+	void *buf;
 } ALIGNED(16);
 
 int fioDread(int fd, io_dirent_t *buf)
@@ -681,6 +680,11 @@ int fioDread(int fd, io_dirent_t *buf)
 	}
 
 	return result;
+}
+
+int fioDreadMC(int fd, fio_dirent_t *buf)
+{
+	return fioDread(fd,(io_dirent_t*)buf);
 }
 #endif
 
@@ -731,7 +735,7 @@ struct _fio_chstat_arg {
 		int cbit;
 		int result;
 	} p;
-	io_stat_t stat;
+	fio_stat_t stat;
 	char name[FIO_PATH_MAX];
 };
 
@@ -746,7 +750,7 @@ int fioChstat(const char *name, io_stat_t *buf, u32 cbit)
 	WaitSema(_fio_completion_sema);
 
 	arg.p.cbit = cbit;
-	memcpy(&arg.stat, buf, sizeof(io_stat_t));
+	memcpy(&arg.stat, buf, sizeof(fio_stat_t));
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
@@ -796,265 +800,3 @@ int fioFormat(const char *name)
 	return result;
 }
 #endif
-
-/* The unistd glue functions.  */
-#if defined(F_fio_unistd) || defined(DOXYGEN)
-#include <limits.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <kernel/dirent.h>
-
-int mkdir(const char *path, mode_t mode)
-{
-  return fioMkdir(path);
-}
-
-int rename(const char *old, const char *new)
-{
-  return -1;
-}
-
-int link(const char *old, const char *new)
-{
-  return -1;
-}
-
-off_t lseek(int fd, off_t offset, int whence)
-{
-  if (offset > INT_MAX)
-    return -1;
-
-  return fioLseek(fd,offset,whence);
-}
-
-/* fioGetStat is unstable on an unpatched kernel */
-int stat(const char *path, struct stat *st)
-{
-  long long high;
-  int mc = 0;
-  unsigned int years = 0;
-  io_stat_t f_st;
-  struct tm loctime;
-
-  if (fioGetstat(path,&f_st) < 0)
-    return -1;
-
-  if ((path[0] == 'm') && (path[1] == 'c'))
-    mc = 1;
-  if ((path[0] == 'm') && (path[1] == 'a')
-      && (path[2] == 's') && (path[3] == 's'))
-    mc = 1;
-  if ((path[0] == 's') && (path[1] == 'd'))
-    mc = 1;
-  if ((path[0] == 's') && (path[1] == 'm') && (path[2] == 'b'))
-    mc = 1;
-
-  /* Type */
-  if (mc)
-  {
-    if (IO_MC_ISDIR(f_st.mode))
-      st->st_mode = S_IFDIR;
-    if (IO_MC_ISREG(f_st.mode))
-      st->st_mode = S_IFREG;
-    if (f_st.mode & IO_MC_R)
-      st->st_mode = st->st_mode | S_IRUSR | S_IRGRP | S_IROTH;
-    if (f_st.mode & IO_MC_W)
-      st->st_mode = st->st_mode | S_IWUSR | S_IWGRP | S_IWOTH;
-    if (f_st.mode & IO_MC_X)
-      st->st_mode = st->st_mode | S_IXUSR | S_IXGRP | S_IXOTH;
-  }
-  else
-  {
-    if (IO_S_ISLNK(f_st.mode))
-      st->st_mode = S_IFLNK;
-    if (IO_S_ISREG(f_st.mode))
-      st->st_mode = S_IFREG;
-    if (IO_S_ISDIR(f_st.mode))
-      st->st_mode = S_IFDIR;
-
-    /* Access */
-    if (f_st.mode & IO_S_IROTH)
-      st->st_mode = st->st_mode | S_IROTH;
-    if (f_st.mode & IO_S_IWOTH)
-      st->st_mode = st->st_mode | S_IWOTH;
-    if (f_st.mode & IO_S_IXOTH)
-      st->st_mode = st->st_mode | S_IXOTH;
-
-    if (f_st.mode & IO_S_IRGRP)
-      st->st_mode = st->st_mode | S_IRGRP;
-    if (f_st.mode & IO_S_IWGRP)
-      st->st_mode = st->st_mode | S_IWGRP;
-    if (f_st.mode & IO_S_IXGRP)
-      st->st_mode = st->st_mode | S_IXGRP;
-
-    if (f_st.mode & IO_S_IRUSR)
-      st->st_mode = st->st_mode | S_IRUSR;
-    if (f_st.mode & IO_S_IWUSR)
-      st->st_mode = st->st_mode | S_IWUSR;
-    if (f_st.mode & IO_S_IXUSR)
-      st->st_mode = st->st_mode | S_IXUSR;
-  }
-
-  /* Size */
-  st->st_size = f_st.size;
-
-  if (f_st.hisize) {
-    high = f_st.hisize;
-    st->st_size = st->st_size + (high << 32);
-  }
-
-  /* Time, ignores timezone. */
-  years = f_st.ctime[7];
-  years = (years<<8) + f_st.ctime[6];
-  loctime.tm_year =  years;
-  loctime.tm_mon  =  f_st.ctime[5]-1;
-  loctime.tm_mday =  f_st.ctime[4]-1;
-  loctime.tm_hour =  f_st.ctime[3];
-  loctime.tm_min  =  f_st.ctime[2];
-  loctime.tm_sec  =  f_st.ctime[1];
-  st->st_ctime    = mktime(&loctime);
-
-  years = 0;
-  years = f_st.atime[7];
-  years = (years<<8) + f_st.atime[6];
-  loctime.tm_year =  years;
-  loctime.tm_mon  =  f_st.atime[5]-1;
-  loctime.tm_mday =  f_st.atime[4]-1;
-  loctime.tm_hour =  f_st.atime[3];
-  loctime.tm_min  =  f_st.atime[2];
-  loctime.tm_sec  =  f_st.atime[1];
-  st->st_atime    = mktime(&loctime);
-
-  years = 0;
-  years = f_st.mtime[7];
-  years = (years<<8) + f_st.mtime[6];
-  loctime.tm_year =  years;
-  loctime.tm_mon  =  f_st.mtime[5]-1;
-  loctime.tm_mday =  f_st.mtime[4]-1;
-  loctime.tm_hour =  f_st.mtime[3];
-  loctime.tm_min  =  f_st.mtime[2];
-  loctime.tm_sec  =  f_st.mtime[1];
-  st->st_mtime    = mktime(&loctime);
-
-  if ((st->st_ctime == -1) || (st->st_atime == -1) || (st->st_mtime == -1))
-    return -1;
-
-  return 0;
-}
-
-int fstat(int fd, struct stat *sbuf)
-{
-  return -1;
-}
-
-int isatty(int fd)
-{
-  return 1;
-}
-
-int open(const char *name, int flags, ...)
-{
-  return fioOpen(name,flags);
-}
-
-DIR *opendir (const char *path)
-{
-  static DIR dir;
-
-  if ((dir.d_fd = fioDopen(path)) < 0)
-    return NULL;
-
-  strncpy(dir.d_dir, path, 256);
-
-  return &dir;
-}
-struct dirent entry;
-struct dirent *readdir(DIR *d)
-{
-  io_dirent_t __fio_entry;
-
-  if (d == NULL)
-    return NULL;
-
-  if (d->d_fd < 0)
-    return NULL;
-
-  if (fioDread(d->d_fd, &__fio_entry) < 1)
-      return NULL;
-
-  strncpy(entry.d_name, __fio_entry.name, 256);
-
-  return &entry;
-}
-
-int closedir(DIR *d)
-{
-  if (d == NULL)
-    return -1;
-
-  if (d->d_fd < 0)
-    return -1;
-
-  if (fioDclose(d->d_fd) < 0)
-    return -1;
-  else {
-    d->d_fd = -1;
-    return 0;
-  }
-}
-
-void rewinddir(DIR *d)
-{
-  if (d == NULL)
-    return;
-
-  if (d->d_fd < 0)
-    return;
-
-  /* Reinitialize by closing and opening. */
-  if (fioDclose(d->d_fd) < 0) {
-    d->d_fd = -1;
-    return;
-  }
-
-  d->d_fd = fioDopen(d->d_dir);
-
-  return;
-}
-
-int close(int fd)
-{
-  return fioClose(fd);
-}
-
-int read(int fd, void *buf, size_t count)
-{
-  if (count > INT_MAX)
-    return -1;
-
-  return fioRead(fd, buf, count);
-}
-
-int remove(const char *path)
-{
-  return fioRemove(path);
-}
-
-int rmdir(const char *path)
-{
-  return fioRmdir(path);
-}
-
-int unlink(const char *path)
-{
-  return fioRemove(path);
-}
-
-int write(int fd, const void *buf, size_t count)
-{
-  if (count > INT_MAX)
-    return -1;
-
-  return fioWrite(fd, buf, (int)count);
-}
-#endif /* F_fio_unistd */
