@@ -172,10 +172,10 @@ $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifrpc.c
 	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
 $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)loadfile.c
-	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/fileio/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
 $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/fileio/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
 $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@

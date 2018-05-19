@@ -16,8 +16,7 @@
  */
 
 #if defined(F_SifExecModuleFile) || defined(DOXYGEN)
-#include <fcntl.h>
-#include <unistd.h>
+#include <fileio.h>
 #endif
 
 #include <tamtypes.h>
@@ -478,13 +477,13 @@ int SifExecModuleFile(const char *path, u32 arg_len, const char *args, int *mod_
 	void *iop_addr;
 	int res, size, fd;
 
-	if ((fd = open(path, O_RDONLY, 0666)) < 0)
+	if ((fd = fioOpen(path, IO_RDONLY)) < 0)
 		return fd;
 
-	if ((size = lseek(fd, 0, SEEK_END)) < 0)
+	if ((size = fioLseek(fd, 0, IO_SEEK_END)) < 0)
 		return size;
 
-	close(fd);
+	fioClose(fd);
 
 	if (!(iop_addr = SifAllocIopHeap(size)))
 		return -E_IOP_NO_MEMORY;

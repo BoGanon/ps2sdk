@@ -16,8 +16,7 @@
  */
 
 #if defined(F_GetRomName) || defined(DOXYGEN)
-#include <fcntl.h>
-#include <unistd.h>
+#include <fileio.h>
 #endif
 
 #include <tamtypes.h>
@@ -56,9 +55,9 @@ char* GetRomName(char *romname)
 {
 	int fd;
 
-	fd = open("rom0:ROMVER", O_RDONLY, 0666);
-	read(fd, romname, 14);
-	close(fd);
+	fd = fioOpen("rom0:ROMVER", IO_RDONLY);
+	fioRead(fd, romname, 14);
+	fioClose(fd);
 	return romname;
 }
 #endif

@@ -29,7 +29,6 @@ extern int errno;
 #include <sifrpc.h>
 
 #include <kernel/string.h>
-#include <kernel/dirent.h>
 
 #ifndef ENOPKG
 #define ENOPKG 65
