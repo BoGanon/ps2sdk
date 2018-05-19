@@ -12,28 +12,28 @@
  * @file
  * Macros, structures & function prototypes for mclib.
  *
- * @defgroup libmc libmc: memorycard library.
- */
+ * @addtogroup libmc libmc: memorycard library.
+ * @{
+ *
+ * @details These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
+ * modules stored in rom0. To determine which one you are using, send the
+ * appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
+ *
+ * @note These functions seem to work for both psx and ps2 memcards
+
+ * To use memcards:\n
+ * 1) first load modules (sio2man then mcman/mcserv)\n
+ * 2) call mcInit(MC_TYPE)\n
+ * 3) use mcGetInfo() to see if memcards are connected\n
+ * 4) use mcSync to check that the function has finished
+
+ * All mc* functions except mcInit() are asynchronous and require mcSync()
+ * usage to test when they are done.
+ * @}
+*/
 
 /** @addtogroup libmc
     @{
-*/
-
-/*
-	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
-	modules stored in rom0. To determine which one you are using, send the
-	appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
-
-        NOTE: These functions seem to work for both psx and ps2 memcards
-
-        to use memcards:
-        1) first load modules (sio2man then mcman/mcserv)
-        2) call mcInit(MC_TYPE)
-        3) use mcGetInfo() to see if memcards are connected
-        4) use mcSync to check that the function has finished
-
-        all mc* functions except mcInit() are asynchronous and require mcSync()
-        usage to test when they are done
 */
 
 #ifndef __LIBMC_H__
@@ -41,33 +41,14 @@
 
 #include <libmc-common.h>
 
-#define MC_WAIT					0
-#define MC_NOWAIT				1
+/** @name mcSync
+ *  mcSync values.
+ * @{
+ */
+#define MC_WAIT			0
+#define MC_NOWAIT		1
 
-#define MC_TYPE_PSX				1
-#define MC_TYPE_PS2				2
-#define MC_TYPE_POCKET			3
-#define MC_TYPE_NONE			0
-
-#define MC_FORMATTED		1
-#define MC_UNFORMATTED		0
-
-// Valid bits in memcard file attributes (mctable.AttrFile)
-#define MC_ATTR_READABLE        0x0001
-#define MC_ATTR_WRITEABLE       0x0002
-#define MC_ATTR_EXECUTABLE      0x0004
-#define MC_ATTR_PROTECTED       0x0008
-#define MC_ATTR_FILE            0x0010
-#define MC_ATTR_SUBDIR          0x0020
-/** File or directory */
-#define MC_ATTR_OBJECT          0x0030
-#define MC_ATTR_CLOSED          0x0080
-#define MC_ATTR_PDAEXEC         0x0800
-#define MC_ATTR_PSX             0x1000
-/** not hidden in osdsys, but it is to games */
-#define MC_ATTR_HIDDEN          0x2000
-
-/** function numbers returned by mcSync in the 'cmd' pointer */
+/**  Function numbers returned by mcSync in the 'cmd' pointer. */
 enum MC_FUNC_NUMBERS{
 	MC_FUNC_NONE		= 0x00,
 	MC_FUNC_GET_INFO,
@@ -91,12 +72,48 @@ enum MC_FUNC_NUMBERS{
 	MC_FUNC_READ_PAGE,
 	MC_FUNC_WRITE_PAGE,
 };
+/**@}*/
 
-/**
+/** @name mcGetInfo
+ *  Types of memory cards.
+ * @{
+ */
+#define MC_TYPE_PSX		1
+#define MC_TYPE_PS2		2
+#define MC_TYPE_POCKET		3
+#define MC_TYPE_NONE		0
+
+/** Memory card format type */
+#define MC_FORMATTED		1
+#define MC_UNFORMATTED		0
+/**@}*/
+
+/** @name mcGetDir
+ *  Valid bits in memcard file attributes (mctable.AttrFile)
+ * @{
+ */
+#define MC_ATTR_READABLE        0x0001
+#define MC_ATTR_WRITEABLE       0x0002
+#define MC_ATTR_EXECUTABLE      0x0004
+#define MC_ATTR_PROTECTED       0x0008
+#define MC_ATTR_FILE            0x0010
+#define MC_ATTR_SUBDIR          0x0020
+/** File or directory */
+#define MC_ATTR_OBJECT          0x0030
+/** Write completed. */
+#define MC_ATTR_CLOSED          0x0080
+#define MC_ATTR_PDAEXEC         0x0800
+#define MC_ATTR_PSX             0x1000
+/** not hidden in osdsys, but it is to games */
+#define MC_ATTR_HIDDEN          0x2000
+/**@}*/
+
+/** @name mcIcon
  * These types show up in the OSD browser when set.
  * If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
  * AFAIK these have no other effects.
  * Known type IDs for icon.sys file:
+ * @{
  */
 enum MCICON_TYPES{
 	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
@@ -128,7 +145,7 @@ typedef struct
     iconFVECTOR lightCol[3];
     /** ambient light */
     iconFVECTOR lightAmbient;
-    /** application title - NOTE: stored in sjis, NOT normal ascii */
+    /** application title - @note stored in sjis, NOT normal ascii */
     unsigned short title[34];
     /** list icon filename */
     unsigned char view[64];
@@ -139,6 +156,7 @@ typedef struct
     /** unknown */
     unsigned char unknown3[512];
 } mcIcon;
+/**@}*/
 
 typedef struct _sceMcTblGetDir {	// size = 64
 	sceMcStDateTime _Create;	// 0
@@ -197,9 +215,13 @@ typedef struct
     unsigned char name[32];
 } mcTable __attribute__((deprecated, aligned (64)));
 
-// values to send to mcInit() to use either mcserv or xmcserv
+/** @name mcInit
+ *  Values to send to mcInit() to use either mcserv or xmcserv
+ * @{
+ */
 #define MC_TYPE_MC	0
 #define MC_TYPE_XMC	1
+/**@}*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -222,7 +244,8 @@ int mcInit(int type);
  * @param slot slot number
  * @param type pointer to get memcard type
  * @param free pointer to get number of free clusters
- * @param format pointer to get whether or not the card is formatted (Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
+ * @param format pointer to get whether or not the card is formatted @note Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
+ *
  * @return 0 = successful; < 0 = error
  */
 int mcGetInfo(int port, int slot, int* type, int* free, int* format);
@@ -386,7 +409,8 @@ int mcUnformat(int port, int slot);
 int mcGetEntSpace(int port, int slot, const char* path);
 
 /** rename file or dir on memcard
- * Note: rom0:MCSERV does not support this.
+ * @note rom0:MCSERV does not support this.
+ *
  * mcSync returns:	0 if ok
  *					< 0 if error
  *
@@ -399,7 +423,8 @@ int mcGetEntSpace(int port, int slot, const char* path);
 int mcRename(int port, int slot, const char* oldName, const char* newName);
 
 /** Erases a block on the memory card.
- * Note: rom0:XMCSERV does not support this.
+ * @note rom0:XMCSERV does not support this.
+ *
  * mcSync returns:	0 if ok
  *					< 0 if error
  *
@@ -412,7 +437,8 @@ int mcRename(int port, int slot, const char* oldName, const char* newName);
 int mcEraseBlock(int port, int slot, int block, int mode);
 
 /** Reads a page from the memory card.
- * Note: rom0:XMCSERV does not support this.
+ * @note rom0:XMCSERV does not support this.
+ *
  * mcSync returns:	0 if ok
  *					< 0 if error
  *
@@ -425,7 +451,8 @@ int mcEraseBlock(int port, int slot, int block, int mode);
 int mcReadPage(int port, int slot, unsigned int page, void *buffer);
 
 /** Writes a page to the memory card. (The block which the page resides on must be erased first!)
- * Note: rom0:XMCSERV does not support this.
+ * @note rom0:XMCSERV does not support this.
+ *
  * mcSync returns:	0 if ok
  *					< 0 if error
  *
@@ -438,8 +465,10 @@ int mcReadPage(int port, int slot, unsigned int page, void *buffer);
 int mcWritePage(int port, int slot, int page, const void *buffer);
 
 /** change mcserv thread priority
- * (I don't think this is implemented properly)
- * Note: rom0:MCSERV does not support this.
+ * @note (I don't think this is implemented properly)
+ *
+ * @note rom0:MCSERV does not support this.
+ *
  * mcSync returns:	0 if ok
  *					< 0 if error
  *

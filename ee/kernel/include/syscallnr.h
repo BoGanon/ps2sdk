@@ -6,6 +6,9 @@
 #ifndef __SYSCALLNR_H__
 #define __SYSCALLNR_H__
 
+/** @name Kernel Syscall Numbers
+ *  @{
+ */
 #define __NR_ResetEE			1
 #define __NR_SetGsCrt			2
 #define __NR__Exit			4
@@ -151,5 +154,6 @@
 #define __NR_GetMemorySize		0x7f
 #define __NR__GetGsDxDyOffset		0x80
 #define __NR__InitTLB			0x82
+/** @} */
 
 #endif /* __SYSCALLNR_H__ */

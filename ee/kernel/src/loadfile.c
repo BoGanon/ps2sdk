@@ -12,7 +12,6 @@
 /**
  * @file
  * IOP executable file loader API.
- * @defgroup loadfile EE LOADFILE: ELF and IRX loader client library.
  */
 
 #if defined(F_SifExecModuleFile) || defined(DOXYGEN)

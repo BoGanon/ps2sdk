@@ -106,7 +106,9 @@ int InitThread(void)
 #endif
 
 #if defined(F_iWakeupThread) || defined(DOXYGEN)
-//The original iWakeupThread cannot wake up threads in THS_RUN state.
+/// @bug The original iWakeupThread cannot wake up threads in THS_RUN state.
+///      Fixed if using patched kernel.
+///
 s32 iWakeupThread(s32 thread_id)
 {
 	int index;
@@ -131,7 +133,10 @@ s32 iWakeupThread(s32 thread_id)
 #endif
 
 #if defined(F_iRotateThreadReadyQueue) || defined(DOXYGEN)
-//The original iRotateThreadReadyQueue will not change the current thread ID.
+/// @bug The original iRotateThreadReadyQueue will not change the current
+///      thread ID.
+///      Fixed if using patched kernel.
+///
 s32 iRotateThreadReadyQueue(s32 priority)
 {
 	int index;
@@ -151,7 +156,10 @@ s32 iRotateThreadReadyQueue(s32 priority)
 #endif
 
 #if defined(F_iSuspendThread) || defined(DOXYGEN)
-//The original iSuspendThread allows a thread to suspend itself, but won't change the current thread ID.
+/// @bug The original iSuspendThread allows a thread to suspend itself, but
+///      won't change the current thread ID.
+///      Fixed if using patched kernel.
+///
 s32 iSuspendThread(s32 thread_id)
 {
 	int index;

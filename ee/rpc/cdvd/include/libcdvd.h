@@ -12,22 +12,22 @@
  * @file
  * Definitions for libcdvd on the EE
  *
- * @defgroup libcdvd libcdvd: CDVD library.
  */
 
-/** @addtogroup libcdvd
-    @{
-*/
 #ifndef __LIBCDVD_H__
 #define __LIBCDVD_H__
+
+/** @addtogroup libcdvd libcdvd: CDVD library.
+    @{
+
+    @details EE-only libcdvd function prototypes.
+*/
 
 #include <libcdvd-common.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//EE-only libcdvd function prototypes.
 
 /** read data to iop memory
  * 

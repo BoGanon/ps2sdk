@@ -12,25 +12,30 @@
  * @file
  * audsrv EE-side RPC code
  *
- * @defgroup audsrv audsrv: Audio playback library.
  */
-
-/** @addtogroup audsrv
-    @{
-*/
 
 #ifndef __AUDSRV_H__
 #define __AUDSRV_H__
 
+/** @addtogroup audsrv audsrv: Audio playback library.
+    @{
+*/
+
 #define	AUDSRV_IRX              0x870884d
 
+/** @name Volume
+ * @{
+ */
 /** minmum volume */
 #define MIN_VOLUME                 0x0000
 
 /** maximum volume */
 #define MAX_VOLUME                 0x3fff
+/** @} */
 
-/** error codes */
+/** @name Error codes
+ * @{
+ */
 #define AUDSRV_ERR_NOERROR                 0x0000
 #define AUDSRV_ERR_NOT_INITIALIZED         0x0001
 #define AUDSRV_ERR_RPC_FAILED              0x0002
@@ -42,6 +47,7 @@
 
 #define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM    0x0010
 #define AUDSRV_ERR_FAILED_TO_CREATE_SEMA    0x0011
+/** @} */
 
 /** structure used to set new format */
 typedef struct audsrv_fmt_t

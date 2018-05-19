@@ -16,15 +16,20 @@
 #ifndef IO_MOUNT_H
 #define IO_MOUNT_H
 
-/** @addtogroup fileio
+/** @addtogroup fio_stat File I/O file modes and types
     @{
 */
 
+/** @name I/O Mount Flags
+ *  The flags used when mounting a partition.
+ * @{
+ */
 #define IO_MT_NORMAL	0
 #define IO_MT_RDONLY	1
 #define IO_MT_ROBUST	2
+/**@} */
 
-/** End of addtogroup fileio
+/** End of addtogroup fio_stat
  *  @}
  */
 

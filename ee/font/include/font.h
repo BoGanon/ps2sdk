@@ -9,6 +9,21 @@
 #include <draw.h>
 #include <tamtypes.h>
 
+/**
+     * FontX2
+         * Fontx2 fonts can be single byte JISCII but can also have double byte
+           Shift-JIS.
+         * The rom0:KROM file in the bios is a fontx2 font that supports both.
+         * The print functions support Shift-JIS encoded strings.
+
+     * FontStudio
+        FontStudio was a useful font utility for compressing UTF-8 variable
+        width Truetype fonts into a small image. Then, using pngquant, the
+        texture could be further compressed down to 4-bit.
+
+        Unfortunately, it seems to have disappeared.
+*/
+
 /** FontX2 types */
 #define SINGLE_BYTE 0
 #define DOUBLE_BYTE 1

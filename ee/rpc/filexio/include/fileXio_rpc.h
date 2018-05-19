@@ -13,18 +13,15 @@
  * fileXio RPC client header file
  */
 
-/** @defgroup libfileXio FileXio: File I/O functions.
- *
- *  A newer version of the file input/output library that supports more
- *  filesystem functionality using iomanX.
- */
-
-/** @addtogroup libfileXio
-    @{
-*/
-
 #ifndef __FILEXIO_RPC_H__
 #define __FILEXIO_RPC_H__
+
+/** @addtogroup libfileXio FileXio: EE FileXio RPC Client
+ *  @{
+ *
+ *  @details A file input/output library that supports more
+ *  filesystem functionality using iomanX.
+ */
 
 #include <fileXio.h>
 

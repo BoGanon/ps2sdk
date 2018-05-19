@@ -34,6 +34,38 @@
 #define PAD_L2        0x0100
 #endif
 
+/*
+An example of getting a controller, using it, and freeing it.
+
+// Unlocked means the analog can be turned on or off
+pad_t *pad1 = pad_open(0,0,MODE_UNLOCK);
+
+// Wait for pad to be ready
+pad_wait(pad1);
+
+// Read buttons
+pad_get_buttons(pad1);
+
+// The btns bits. 0 means pressed. 1 means unpressed.
+if ((pad1->buttons.btns ^ 0xffff) & PAD_LEFT)
+  printf("Left is pressed");
+
+// Enable force feedback
+pad_init_actuators(pad1);
+
+// Turn on small motor
+pad_set_actuators(pad1,1,0);
+
+// Set large motor to 50% (0-255)
+pad_set_actuators(pad1,1,128);
+
+// Stop force feedback
+pad_set_actuators(pad1,0,0);
+
+// Free the pad
+pad_close(pad1);
+*/
+
 typedef struct {
 	char small;
 	unsigned char large;

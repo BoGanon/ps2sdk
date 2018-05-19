@@ -12,19 +12,18 @@
  * @file
  * Pad externals
  *
- * @defgroup libpad libpad: pad input library.
  */
-
-/** @addtogroup libpad
-    @{
-*/
 
 #ifndef __LIBPAD_H__
 #define __LIBPAD_H__
 
-/*
- * Button bits
- */
+/** @addtogroup libpad libpad: pad input library.
+    @{
+*/
+
+/** @name Button bits 
+  * @{
+  */
 #define PAD_LEFT      0x0080
 #define PAD_DOWN      0x0040
 #define PAD_RIGHT     0x0020
@@ -41,27 +40,30 @@
 #define PAD_L1        0x0400
 #define PAD_R2        0x0200
 #define PAD_L2        0x0100
+/** @} */
 
-/*
- * Pad states
- */
+/** @name Pad States
+  * @{
+  */
 #define PAD_STATE_DISCONN       0x00
 #define PAD_STATE_FINDPAD       0x01
 #define PAD_STATE_FINDCTP1      0x02
 #define PAD_STATE_EXECCMD       0x05
 #define PAD_STATE_STABLE        0x06
 #define PAD_STATE_ERROR         0x07
+/** @} */
 
-/*
- * Pad request states
- */
+/** @name Pad Request States
+  * @{
+  */
 #define PAD_RSTAT_COMPLETE      0x00
 #define PAD_RSTAT_FAILED        0x01
 #define PAD_RSTAT_BUSY          0x02
+/** @} */
 
-/*
- * Connected pad type
- */
+/** @name Pad Types
+  * @{
+  */
 #define PAD_TYPE_NEJICON    0x2
 #define PAD_TYPE_KONAMIGUN  0x3
 #define PAD_TYPE_DIGITAL    0x4
@@ -71,30 +73,35 @@
 #define PAD_TYPE_JOGCON     0xE
 #define PAD_TYPE_EX_TSURICON 0x100
 #define PAD_TYPE_EX_JOGCON  0x300
-/*
- * padInfoMode values
- */
+/** @} */
+
+/** @name padInfoMode values
+  * @{
+  */
 #define PAD_MODECURID   1
 #define PAD_MODECUREXID 2
 #define PAD_MODECUROFFS 3
 #define PAD_MODETABLE   4
+/** @} */
 
-/*
- * padSetMainMode
- */
+/** @name padSetMainMode values
+  * @{
+  */
 #define PAD_MMODE_DIGITAL   0
 #define PAD_MMODE_DUALSHOCK 1
 
 #define PAD_MMODE_UNLOCK    0
 #define PAD_MMODE_LOCK      3
+/** @} */
 
-/*
- * padInfoAct cmds
- */
+/** @name padInfoAct values
+  * @{
+  */
 #define PAD_ACTFUNC     1
 #define PAD_ACTSUB      2
 #define PAD_ACTSIZE     3
 #define PAD_ACTCURR     4
+/** @} */
 
 /** Button info */
 struct padButtonStatus

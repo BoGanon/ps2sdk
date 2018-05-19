@@ -11,21 +11,26 @@
 
 /**
  * @file
- * EE File IO handling
- * @defgroup fileio File I/O
- *
- * The file input/output handling library.
- *
- * @warning  @ref fioDread "fioDread()" and @ref fioGetstat "fioGetstat()"
- *           are unstable.
- * @warning  @ref fioRemove "fioRemove()" falls through to fioMkdir() upon
- *           completion.
- * @warning  @ref sbvpatches "Patches" are available to fix these issues.
- *                            Otherwise, please use fileXio instead.
+ * EE FILEIO RPC client
  */
 
-/** @addtogroup libfileio
-    @{
+/** 
+ * @addtogroup libfileio FILEIO: EE FILEIO RPC Client
+ * @{
+ *
+ * @details This is the EE RPC client protocol for FILEIO.
+ *
+ * @bug FILEIO in the bios is unstable.
+ *
+ * @bug @ref fioDread "fioDread()" and @ref fioGetstat "fioGetstat()"
+ *           do not suspend interrupts to perform DMA transfers on the IOP.
+ *
+ * @bug @ref fioRemove "fioRemove()" falls through to fioMkdir() upon
+ *           completion.
+ *
+ * @bug A @ref sbvpatches "patch" is available to fix these issues.
+ *
+ * @note This rpc client protocol does not support newer versions of FILEIO.
 */
 
 #ifndef __FILEIO_H__
@@ -36,11 +41,21 @@
 
 #define FIO_PATH_MAX	256
 
+/** @name fioSetBlockMode
+ *  Values for setting blocking mode. 
+ * @{
+ */
 #define FIO_WAIT	0
 #define FIO_NOWAIT	1
+/**@}*/
 
+/** @name fioSync
+ *  Values for the return value of fioSync(). 
+ * @{
+ */
 #define FIO_COMPLETE	1
 #define FIO_INCOMPLETE	0
+/**@}*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,15 +77,10 @@ int fioSync(int mode, int *retVal);
 int fioIoctl(int fd, int request, void *data);
 int fioDopen(const char *name);
 int fioDclose(int fd);
-/** @warning Unstable; does not suspend interrupts prior to performing DMA
-             transfers on the IOP side. */
 int fioDread(int fd, io_dirent_t *buf);
-/** @warning Unstable; does not suspend interrupts prior to performing DMA
-             transfers on the IOP side. */
 int fioDreadMC(int fd, fio_dirent_t *buf);
 int fioGetstat(const char *name, io_stat_t *buf);
 int fioChstat(const char *name, io_stat_t *buf, unsigned int cbit);
-/** @warning Falls through to the next case (mkdir) upon completion. */
 int fioRemove(const char *name);
 int fioFormat(const char *name);
 int fioRmdir(const char* dirname);

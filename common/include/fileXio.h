@@ -15,10 +15,6 @@
  * that are used by both IOP and EE sides.
  */
 
-/** @addtogroup libfileXio
-    @{
-*/
-
 #ifndef __FILEXIO_H__
 #define __FILEXIO_H__
 
@@ -29,6 +25,7 @@
 #include <sys/io_stat.h>
 
 #define FILEXIO_IRX	0xb0b0b00
+
 enum FILEXIO_CMDS{
 	FILEXIO_DOPEN	= 0x01,
 	FILEXIO_DREAD,
@@ -82,11 +79,11 @@ typedef struct {
 
 #define FILEXIO_MAX_DEVICES 32
 
-#define FILEXIO_DT_CHAR	0x01
-#define FILEXIO_DT_CONS	0x02
+#define FILEXIO_DT_CHAR		0x01
+#define FILEXIO_DT_CONS		0x02
 #define FILEXIO_DT_BLOCK	0x04
-#define FILEXIO_DT_RAW	0x08
-#define FILEXIO_DT_FS	0x10
+#define FILEXIO_DT_RAW		0x08
+#define FILEXIO_DT_FS		0x10
 /** Supports calls after chstat().  */
 #define FILEXIO_DT_FSEXT	0x10000000
 
@@ -262,7 +259,3 @@ struct fxio_rwbuff{
 };
 
 #endif /* __FILEXIO_H__ */
-
-/** End of addtogroup libfileXio
- *  @}
- */

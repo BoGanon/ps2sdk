@@ -22,48 +22,52 @@
  *  @details The values needed for various file I/O operations.
 */
 
+/** @name I/O Filesystem Types
+  * These are the partition filesystem types stored in stat.mode when
+  * reading "hdd0:" as a directory.
+  *
+  * @{
+  */
 #define	IO_FSTYPE_EXT2		0x0083
 #define	IO_FSTYPE_EXT2_SWAP	0x0082
 #define	IO_FSTYPE_PFS		0x0100
 #define	IO_FSTYPE_EMPTY		0x0000
+/**@}*/
 
-/**	These are used for filesystems with advanced file
-	attributes or permissions.
+/** @name I/O Extended Filesystem Mask Values
+ * These are used for filesystems with extended file attributes or permissions.
+ *
+ * @note Add to this list any known devices that use these attributes.
+ *
+ * @note Known device list:
+ * @li @c pfs
+ * @{
+ */
 
-	Add to this list any known devices that use these attributes.
-	Known device list: pfs
-*/
-
-/** File types */
 #define IO_S_IFMT		070000
 #define IO_S_IFLNK		040000
 #define IO_S_IFREG		020000
 #define IO_S_IFDIR		010000
 
-/** File ID bits */
 #define IO_S_ISUID		04000
 #define IO_S_ISGID		02000
 #define IO_S_ISVTX		01000
 
-/** User access */
 #define IO_S_IRWXU		0700
 #define IO_S_IRUSR		0400
 #define IO_S_IWUSR		0200
 #define IO_S_IXUSR		0100
 
-/** Group access */
 #define IO_S_IRWXG		0070
 #define IO_S_IRGRP		0040
 #define IO_S_IWGRP		0020
 #define IO_S_IXGRP		0010
 
-/** Other access */
 #define IO_S_IRWXO		0007
 #define IO_S_IROTH		0004
 #define IO_S_IWOTH		0002
 #define IO_S_IXOTH		0001
 
-/** All access */
 #define IO_S_IRWXA	(IO_S_IRWXU|IO_S_IRWXG|IO_S_IRWXO)
 #define IO_S_IRALL	(IO_S_IRUSR|IO_S_IRGRP|IO_S_IROTH)
 #define IO_S_IWALL	(IO_S_IWUSR|IO_S_IWGRP|IO_S_IWOTH)
@@ -74,20 +78,24 @@
 #define IO_S_ISLNK(m)	(((m) & IO_S_IFMT) == IO_S_IFLNK)
 #define IO_S_ISREG(m)	(((m) & IO_S_IFMT) == IO_S_IFREG)
 #define IO_S_ISDIR(m)	(((m) & IO_S_IFMT) == IO_S_IFDIR)
+/**@}*/
 
-/**	These are used for filesystems without advanced file
-	attributes or permissions.
-	FAT, memory cards, etc.
-
-	Add to this list any known devices that use these attributes.
-	Known device list: mc
-	                   mass (usbhdfsd)
-	                   sd (iEEE1394_disk)
-	                   smb (smbman)
-	                   devfs (devfs)
-	                   host (depends on implementation)
-*/
-
+/** @name I/O Memory Card Filesystem Mask Values
+ * These are used for filesystems without advanced file attributes or
+ * permissions. FAT, memory cards, etc. Most devices emulate these.
+ *
+ * @note Add to this list any devices that use these attributes.
+ *
+ * @note Known device list:
+ * @li @c mc
+ * @li @c mass (usbhdfsd)
+ * @li @c sd (iEEE1394_disk)
+ * @li @c smb (smbman)
+ * @li @c devfs (devfs)
+ * @li @c host (depends on implementation)
+ *
+ * @{
+ */
 #define IO_MC_IFMT		0x0030
 #define IO_MC_IFDIR		0x0020
 #define IO_MC_IFREG		0x0010
@@ -100,8 +108,12 @@
 
 #define IO_MC_ISREG(m)	(((m) & IO_MC_IFMT) == IO_MC_IFREG)
 #define IO_MC_ISDIR(m)	(((m) & IO_MC_IFMT) == IO_MC_IFDIR)
+/**@}*/
 
-/** The field to be changed in Chstat. */
+/** @name I/O Chstat Mask Values
+ *  The field to be changed in Chstat.
+ * @{
+ */
 #define IO_CST_MODE		0x0001
 #define IO_CST_ATTR		0x0002
 #define IO_CST_SIZE		0x0004
@@ -109,6 +121,8 @@
 #define IO_CST_AT		0x0010
 #define IO_CST_MT		0x0020
 #define IO_CST_PRVT		0x0040
+/**@}*/
+
 
 #define IO_DIRENT_SIZE 320
 #define FIO_DIRENT_SIZE 296

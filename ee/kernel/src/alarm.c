@@ -10,9 +10,12 @@
 /**
  * @file
  * EE kernel update for alarm functions
- * ReleaseAlarm is unable to correctly release alarm in all CEX/DEX EE kernels.
- * This also includes code for dealing with the restriction on the COP0 EIE bit
- * becoming set to 0 when an interrupt occurs before interrupts can be disabled.
+ *
+ * @bug ReleaseAlarm is unable to correctly release alarm in all CEX/DEX EE
+ *      kernels.
+ *      This also includes code for dealing with the restriction on the COP0
+ *      EIE bit becoming set to 0 when an interrupt occurs before interrupts
+ *      can be disabled. Fixed if using patched kernel.
  */
 
 #include <kernel.h>
