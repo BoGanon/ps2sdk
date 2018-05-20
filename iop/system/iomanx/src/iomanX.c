@@ -254,6 +254,10 @@ int close(int fd)
 
   /* A device's close() gets called and its return value is returned.
      The file descriptor is cleared. */
+
+  /* I discovered newlib expects close() to close both files and directories.
+     To support this, we add an internal flag to files that were opened with
+     dopen. This might also be part of the internal functionality of IOMAN. */
   if (f->mode & 0x0008)
   {
     res = f->device->ops->dclose(f);
@@ -422,6 +426,7 @@ int dopen(const char *name)
 
   /* Indicates a directory. */
   f->mode = 0x0008;
+
   if ((res = f->device->ops->dopen(f, filename)) >= 0)
     res = (int)(f - file_table);
   else
