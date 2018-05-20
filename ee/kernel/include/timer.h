@@ -86,7 +86,7 @@
 /** @} */
 
 /** End of addtogroup timer
- * @}
+ *  @}
  */
 
 #ifdef __cplusplus

@@ -43,19 +43,19 @@
 
 /** @name fioSetBlockMode
  *  Values for setting blocking mode. 
- * @{
+ *  @{
  */
 #define FIO_WAIT	0
 #define FIO_NOWAIT	1
-/**@}*/
+/** @} */
 
 /** @name fioSync
  *  Values for the return value of fioSync(). 
- * @{
+ *  @{
  */
 #define FIO_COMPLETE	1
 #define FIO_INCOMPLETE	0
-/**@}*/
+/** @} */
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,10 +64,10 @@ extern "C" {
 int fioInit(void);
 void fioExit(void);
 int fioOpen(const char *fname, int mode);
-int fioClose( int fd);
-int fioRead( int fd, void *buff, int buff_size);
-int fioWrite( int fd, const void *buff, int buff_size);
-int fioLseek( int fd, int offset, int whence);
+int fioClose(int fd);
+int fioRead(int fd, void *buff, int buff_size);
+int fioWrite(int fd, const void *buff, int buff_size);
+int fioLseek(int fd, int offset, int whence);
 int fioMkdir(const char* dirname);
 int fioPutc(int fd,int c);
 int fioGetc(int fd);

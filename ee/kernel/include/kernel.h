@@ -258,7 +258,7 @@ static inline int ee_kmode_exit()
 
 
 /** End of addtogroup thread 
- * @}
+ *  @}
  */
 
 #ifdef __cplusplus

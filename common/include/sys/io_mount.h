@@ -22,12 +22,12 @@
 
 /** @name I/O Mount Flags
  *  The flags used when mounting a partition.
- * @{
+ *  @{
  */
 #define IO_MT_NORMAL	0
 #define IO_MT_RDONLY	1
 #define IO_MT_ROBUST	2
-/**@} */
+/** @} */
 
 /** End of addtogroup fio_stat
  *  @}

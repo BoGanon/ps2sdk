@@ -12,24 +12,24 @@
  * @file
  * Macros, structures & function prototypes for mclib.
  *
- * @addtogroup libmc libmc: memorycard library.
- * @{
+ *  @addtogroup libmc libmc: memorycard library.
+ *  @{
  *
- * @details These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
- * modules stored in rom0. To determine which one you are using, send the
- * appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
+ *  @details These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
+ *  modules stored in rom0. To determine which one you are using, send the
+ *  appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
  *
- * @note These functions seem to work for both psx and ps2 memcards
-
- * To use memcards:\n
- * 1) first load modules (sio2man then mcman/mcserv)\n
- * 2) call mcInit(MC_TYPE)\n
- * 3) use mcGetInfo() to see if memcards are connected\n
- * 4) use mcSync to check that the function has finished
-
- * All mc* functions except mcInit() are asynchronous and require mcSync()
- * usage to test when they are done.
- * @}
+ *  @note These functions seem to work for both psx and ps2 memcards
+ *
+ *  To use memcards:\n
+ *  1) first load modules (sio2man then mcman/mcserv)\n
+ *  2) call mcInit(MC_TYPE)\n
+ *  3) use mcGetInfo() to see if memcards are connected\n
+ *  4) use mcSync to check that the function has finished
+ *
+ *  All mc* functions except mcInit() are asynchronous and require mcSync()
+ *  usage to test when they are done.
+ *  @}
 */
 
 /** @addtogroup libmc
@@ -72,11 +72,11 @@ enum MC_FUNC_NUMBERS{
 	MC_FUNC_READ_PAGE,
 	MC_FUNC_WRITE_PAGE,
 };
-/**@}*/
+/** @} */
 
 /** @name mcGetInfo
  *  Types of memory cards.
- * @{
+ *  @{
  */
 #define MC_TYPE_PSX		1
 #define MC_TYPE_PS2		2
@@ -86,11 +86,11 @@ enum MC_FUNC_NUMBERS{
 /** Memory card format type */
 #define MC_FORMATTED		1
 #define MC_UNFORMATTED		0
-/**@}*/
+/** @} */
 
 /** @name mcGetDir
  *  Valid bits in memcard file attributes (mctable.AttrFile)
- * @{
+ *  @{
  */
 #define MC_ATTR_READABLE        0x0001
 #define MC_ATTR_WRITEABLE       0x0002
@@ -106,14 +106,14 @@ enum MC_FUNC_NUMBERS{
 #define MC_ATTR_PSX             0x1000
 /** not hidden in osdsys, but it is to games */
 #define MC_ATTR_HIDDEN          0x2000
-/**@}*/
+/** @} */
 
 /** @name mcIcon
- * These types show up in the OSD browser when set.
- * If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
- * AFAIK these have no other effects.
- * Known type IDs for icon.sys file:
- * @{
+ *  These types show up in the OSD browser when set.
+ *  If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
+ *  AFAIK these have no other effects.
+ *  Known type IDs for icon.sys file:
+ *  @{
  */
 enum MCICON_TYPES{
 	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
@@ -156,7 +156,7 @@ typedef struct
     /** unknown */
     unsigned char unknown3[512];
 } mcIcon;
-/**@}*/
+/** @} */
 
 typedef struct _sceMcTblGetDir {	// size = 64
 	sceMcStDateTime _Create;	// 0
@@ -217,11 +217,11 @@ typedef struct
 
 /** @name mcInit
  *  Values to send to mcInit() to use either mcserv or xmcserv
- * @{
+ *  @{
  */
 #define MC_TYPE_MC	0
 #define MC_TYPE_XMC	1
-/**@}*/
+/** @} */
 
 #ifdef __cplusplus
 extern "C" {

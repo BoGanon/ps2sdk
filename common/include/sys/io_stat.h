@@ -32,7 +32,7 @@
 #define	IO_FSTYPE_EXT2_SWAP	0x0082
 #define	IO_FSTYPE_PFS		0x0100
 #define	IO_FSTYPE_EMPTY		0x0000
-/**@}*/
+/** @} */
 
 /** @name I/O Extended Filesystem Mask Values
  * These are used for filesystems with extended file attributes or permissions.
@@ -78,7 +78,7 @@
 #define IO_S_ISLNK(m)	(((m) & IO_S_IFMT) == IO_S_IFLNK)
 #define IO_S_ISREG(m)	(((m) & IO_S_IFMT) == IO_S_IFREG)
 #define IO_S_ISDIR(m)	(((m) & IO_S_IFMT) == IO_S_IFDIR)
-/**@}*/
+/** @} */
 
 /** @name I/O Memory Card Filesystem Mask Values
  * These are used for filesystems without advanced file attributes or
@@ -108,7 +108,7 @@
 
 #define IO_MC_ISREG(m)	(((m) & IO_MC_IFMT) == IO_MC_IFREG)
 #define IO_MC_ISDIR(m)	(((m) & IO_MC_IFMT) == IO_MC_IFDIR)
-/**@}*/
+/** @} */
 
 /** @name I/O Chstat Mask Values
  *  The field to be changed in Chstat.
@@ -121,7 +121,7 @@
 #define IO_CST_AT		0x0010
 #define IO_CST_MT		0x0020
 #define IO_CST_PRVT		0x0040
-/**@}*/
+/** @} */
 
 
 #define IO_DIRENT_SIZE 320
