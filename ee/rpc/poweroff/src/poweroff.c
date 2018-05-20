@@ -17,12 +17,6 @@
 #include <sifrpc.h>
 #include <pwroff_rpc.h>
 
-#include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
-
 extern void *_gp;
 
 static poweroff_callback poweroff_cb = NULL;

@@ -5,10 +5,6 @@
 #include <graph_config.h>
 
 #include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
 
 int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flicker_filter, char *config)
 {

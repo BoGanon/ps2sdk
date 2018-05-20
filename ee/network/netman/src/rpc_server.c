@@ -8,10 +8,6 @@
 #include <netman_rpc.h>
 
 #include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
 
 #include "internal.h"
 #include "rpc_server.h"

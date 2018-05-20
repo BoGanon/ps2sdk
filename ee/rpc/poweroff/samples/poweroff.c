@@ -15,12 +15,6 @@
 #include <loadfile.h>
 #include <stdio.h>
 
-#include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
-
 #include "libpwroff.h"
 
 static void poweroffCallback(void *arg)

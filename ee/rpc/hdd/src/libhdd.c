@@ -19,10 +19,6 @@
 #include <malloc.h>
 
 #include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
 
 // PS2DRV includes
 #include "sys/io_mount.h"

@@ -19,10 +19,6 @@
 #include <stdarg.h>
 
 #include <errno.h>
-#ifdef errno
-#undef errno
-#endif
-extern int errno;
 
 #include <tamtypes.h>
 #include <kernel.h>
