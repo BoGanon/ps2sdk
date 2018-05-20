@@ -36,40 +36,22 @@ void TerminateLibrary(void)
 #endif
 
 #if defined(F_ps2_sbrk) || defined(DOXYGEN)
-/*
-# _____     ___ ____     ___ ____
-#  ____|   |    ____|   |        | |____|
-# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
-#-----------------------------------------------------------------------
-# (C)2001, Gustavo Scotti (gustavo@scotti.com)
-# (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
-# Licenced under Academic Free License version 2.0
-# Review ps2sdk README & LICENSE files for further details.
-*/
+extern unsigned int end;
 
-#include <unistd.h>
-extern void * _end;
-
-void *ps2_sbrk(size_t increment)
+/* Not sure if this needs to be here. */
+void *ps2_sbrk(ptrdiff_t incr)
 {
-	static void * _heap_ptr = &_end;
-	void *mp, *ret = (void *)-1;
+   static unsigned char *heap_end = (unsigned char*)&end;
+   unsigned char *prev_heap_end;
 
-	if (increment == 0)
-		return _heap_ptr;
+   prev_heap_end = heap_end;
+   heap_end += incr;
 
-	/* If the area we want to allocated is past the end of our heap, we have a problem. */
-	mp = _heap_ptr + increment;
-	if (mp <= EndOfHeap()) {
-		ret = _heap_ptr;
-		_heap_ptr = mp;
-	}
+   if (((ptrdiff_t)heap_end) <= ((ptrdiff_t)EndOfHeap()))
+     return heap_end;
 
-	return ret;
-}
+   heap_end = prev_heap_end;
 
-void *sbrk(ptrdiff_t increment)
-{
-	return ps2_sbrk((size_t)increment);
+   return ((void*)-1);
 }
 #endif
