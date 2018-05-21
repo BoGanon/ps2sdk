@@ -48,7 +48,7 @@ void *ps2_sbrk(ptrdiff_t incr)
    heap_end += incr;
 
    if (((ptrdiff_t)heap_end) <= ((ptrdiff_t)EndOfHeap()))
-     return heap_end;
+     return prev_heap_end;
 
    heap_end = prev_heap_end;
 
