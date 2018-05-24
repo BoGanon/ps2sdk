@@ -10,7 +10,9 @@
 
    # Check weak symbols
    # jump and link if defined
-   # Usage: ckwk $8,sym,1f
+   # Usage:
+   #            ckwk $8,sym,1f
+   #        1:
    .macro ckwk reg,sym,lbl
    la   \reg, \sym
    beqz   \reg, \lbl
@@ -28,8 +30,8 @@
    .type   exit, @function
 
    # New C++ ctor and dtor arrays
-   # Compatible with old _init and _fini
-   # gcc-3.2.3 doesn't support the arrays.
+   # Compatible with _init and _fini
+   # gcc-3.2.3 doesn't support constructor priorities.
    .type   __libc_init_array, @function
    .type   __libc_fini_array, @function
 
@@ -94,8 +96,9 @@ setup_sys:
 
    # Initialize the IOP (user-defined)
    # If compiling newlib with FileXio support and using C++ this MUST be defined
-   # to make sure any output from constructors will not cause a deadlock from
-   # using fileXioWrite().
+   # by the user to load iomanX.irx and fileXio.irx to avoid causing a deadlock
+   # when the fileXio RPC client is used by the standard library for stdout
+   # from C++ constructors before main.
    ckwk   $8,iop_start,1f
 1:
 
@@ -103,7 +106,8 @@ setup_libc:
    # add destructors using atexit()
    la   $4, __libc_fini_array
    jal  atexit
-
+   nop
+   
    # call constructors
    jal   __libc_init_array
    nop
