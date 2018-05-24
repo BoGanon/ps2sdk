@@ -28,12 +28,11 @@ SECTIONS {
 
 	/*.reginfo : { *(.reginfo) } */
 
-	/* Newer linking standard for C++ constructors.
-	   SORT_BY_INIT_PRIORITY isn't supported by ld 2.14 but is by recent
-	   versions of ld as of 2018.
+	/* Newer standard for C++ constructors.
 	   This allows execution of constructors based on priority instead of
 	   linking order. Configure gcc with --disable-initfini-array to use
-	   old .ctors/.dtors behavior.
+	   old .ctors/.dtors behavior. */
+/*
 	.preinit_array : {
 		PROVIDE_HIDDEN (__preinit_array_start = .);
 		KEEP (*(.preinit_array))
@@ -51,28 +50,29 @@ SECTIONS {
 		KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
 		PROVIDE_HIDDEN (__fini_array_end = .);
 	}
-	
-	/* 2.14 compatible version. */
-	/*
-	PROVIDE(__preinit_array_start = .);
+*/
+	/* 2.14 compatible version. It doesn't seem like gcc-3.2.3 supports
+	   creating these sections. Don't use PROVIDE or PROVIDE_HIDDEN with
+	   weak symbols, otherwise the weak user definitions have priority. */
+/*
+	__preinit_array_start = .;
 	.preinit_array ALIGN(16) : {
 		KEEP (*(.preinit_array))
 	}
-	PROVIDE(__preinit_array_end = .);
-	PROVIDE(__init_array_start = .);
+	__preinit_array_end = .;
+	__init_array_start = .;
 	.init_array ALIGN(16): {
 		KEEP (*(SORT(.init_array.*) SORT(.ctors.*)))
 		KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
 	}
-	PROVIDE(__init_array_end = .);
-	PROVIDE(__fini_array_start = .);
+	__init_array_end = .;
+	__fini_array_start = .;
 	.fini_array ALIGN(16): {
 		KEEP (*(SORT(.fini_array.*) SORT(.dtors.*)))
 		KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
 	}
-	PROVIDE(__fini_array_end = .);
-	*/
-	
+	__fini_array_end = .;
+*/
 	/* Global/static constructors and deconstructors. */
 	.ctors ALIGN(16): {
 		KEEP(*crtbegin.o(.ctors))

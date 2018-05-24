@@ -18,25 +18,20 @@
    jalr   \reg
    nop
    .endm
-   
+
+   # IOP init
+   .weak  iop_start
+   .type  iop_start, @function
+
    # Provided by libc
-   .weak   atexit
    .type   atexit, @function
-   .weak   exit
    .type   exit, @function
 
-   # Old C++ ctor and dtor functions
-   .type   _init, @function
-   .type   _fini, @function
    # New C++ ctor and dtor arrays
-   #.type   __libc_init_array, @function
-   #.type   __libc_fini_array, @function
-
-   # Provided by ps2sdk but reusable for newlib
-   .weak   __libc_init
-   .type   __libc_init, @function
-   .weak   __libc_deinit
-   .type   __libc_deinit, @function
+   # Compatible with old _init and _fini
+   # gcc-3.2.3 doesn't support the arrays.
+   .type   __libc_init_array, @function
+   .type   __libc_fini_array, @function
 
    .set   noat
    .set	  noreorder
@@ -63,7 +58,7 @@ zerobss:
    nop
 2:
 
-setupthread:
+setup_thread:
    # setup current thread for creating threads
    la   $4, _gp
    la   $5, _stack
@@ -74,7 +69,7 @@ setupthread:
    addiu   $3, $0, 60
    syscall         # SetupThread(_gp, _stack, _stack_size, _args, _root)
 
-setupmem:
+setup_mem:
    # setup stack and make room for storing arguments
    move   $sp, $2
    addiu   $sp, $sp,-96
@@ -89,62 +84,40 @@ setupmem:
    jal FlushCache  # FlushCache(0)
    move   $4, $0
 
-
-#parseargs:
-#   # call ps2sdk argument parsing
-#
-#   la   $16, _args
-#
-#   la   $8, _ps2sdk_args_parse
-#   beqz   $8, 1f
-#   lw   $4, ($16)
-#
-#   jalr   $8      # _ps2sdk_args_parse(argc, argv)
-#   addiu   $5, $16, 4
-#1:
-
-setup_libc:
+setup_sys:
    # Initialize the kernel first (Apply necessary patches).
    jal _InitSys
    nop
-
-   # init libc
-   ckwk $8,__libc_init,1f
-1:
-   # add destructors using atexit() (weak)
-   # la $4, __libc_fini_array
-   la $4, _fini
-   ckwk   $8,atexit,1f
-1:
-   # call _init for constructors
-   # jal   __libc_init_array
-   jal   _init
-   nop
-
-runmain:
-   # call main
+   
+   # Enable interrupts
    ei
 
+   # Initialize the IOP (user-defined)
+   # If compiling newlib with FileXio support and using C++ this MUST be defined
+   # to make sure any output from constructors will not cause a deadlock from
+   # using fileXioWrite().
+   ckwk   $8,iop_start,1f
+1:
+
+setup_libc:
+   # add destructors using atexit()
+   la   $4, __libc_fini_array
+   jal  atexit
+
+   # call constructors
+   jal   __libc_init_array
+   nop
+
+run_main:
    la   $16, _args
    lw   $4, ($16)
    jal   main       # main(argc, argv)
    addiu $5, $16, 4
 
-destroy_libc:
-   # fall through to libc exit (weak)
-   la   $8, exit
-   beqz   $8, 1f
+   # fall through to libc exit
+   jal   exit       # exit(retval) (noreturn)
    move   $4, $2
 
-   jr   $8          # exit(retval) (noreturn)
-   nop
-1:
-   # deinit libc
-   ckwk   $8,__libc_deinit,1f
-1:
-   # no libc exit
-   j   Exit         # Exit(retval) (noreturn)
-   nop
    .end   _start
 
    .align   3
