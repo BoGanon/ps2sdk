@@ -14,7 +14,7 @@
 #include <erl.h>
 
 char * erl_id = "hello";
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libc",
     0
 };

@@ -9,7 +9,9 @@
 EE_INCS += -I$(PS2SDKSRC)/ee/math/include -I$(PS2SDKSRC)/ee/graph/include \
 	   -I$(PS2SDKSRC)/ee/kernel/src
 
-EE_OBJS = math3d.o erl-support.o
+EE_OBJS = math3d.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

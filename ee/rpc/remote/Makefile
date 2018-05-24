@@ -8,7 +8,9 @@
 
 EE_LIB = librm.a
 
-EE_OBJS = librm.o erl-support.o
+EE_OBJS = librm.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

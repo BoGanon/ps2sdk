@@ -14,7 +14,7 @@
 
 char * erl_id = "libkeyboard";
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libkernel",
     0
 };

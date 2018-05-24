@@ -13,7 +13,7 @@
 #include <erl.h>
 
 char * erl_id = "libgs";
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
 
     0
 };

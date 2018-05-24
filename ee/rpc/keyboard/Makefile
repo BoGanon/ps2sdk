@@ -10,7 +10,9 @@ EE_INCS = -I$(PS2SDKSRC)/ee/rpc/fileio/include
 
 EE_LIB = libkbd.a
 
-EE_OBJS = libkbd.o erl-support.o
+EE_OBJS = libkbd.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

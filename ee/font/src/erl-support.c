@@ -13,7 +13,7 @@
 #include <erl.h>
 
 char * erl_id = "libfont";
-char * erl_dependancies[] =
+char * erl_dependencies[] =
 {
 	"libkernel",
 	"libc",

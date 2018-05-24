@@ -31,7 +31,7 @@ struct erl_record_t {
     u8 * bytes;
     u32 fullsize;
     char * name;
-    char ** dependancies;
+    char ** dependencies;
     u32 flags;
 
     /* Private */

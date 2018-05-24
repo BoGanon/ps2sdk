@@ -14,7 +14,7 @@
 
 char * erl_id = "libfileXio";
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libkernel",
     0
 };

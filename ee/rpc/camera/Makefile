@@ -8,7 +8,9 @@
 
 EE_LIB = libps2cam.a
 
-EE_OBJS = ps2cam_rpc.o erl-support.o
+EE_OBJS = ps2cam_rpc.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

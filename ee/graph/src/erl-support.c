@@ -13,7 +13,7 @@
 #include <erl.h>
 
 char * erl_id = "libgraph";
-char * erl_dependancies[] =
+char * erl_dependencies[] =
 {
     "libkernel",
 	"libc",

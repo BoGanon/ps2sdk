@@ -8,7 +8,9 @@
 
 EE_CFLAGS += -std=c99
 
-EE_OBJS = ps2snd.o erl-support.o
+EE_OBJS = ps2snd.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

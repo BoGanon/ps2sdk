@@ -52,8 +52,8 @@ enum _ps2lib_errors {
 	/* Errors returned by the IOP kernel and system modules.  */
 	/** IOP is in exception context. */	
 	E_IOP_INTR_CONTEXT	= 100,
-	/** inter IRX dependancy error. */
-	E_IOP_DEPENDANCY	= 200,
+	/** inter IRX dependency error. */
+	E_IOP_DEPENDENCY	= 200,
 	/** Invalid IRX module. */
 	E_LF_NOT_IRX		= 201,
 	/** Unable to open executable file. */

@@ -208,7 +208,7 @@ static const char * local_names[] = {
     "_init",
     "_fini",
     "erl_id",
-    "erl_dependancies",
+    "erl_dependencies",
     "erl_copyright",
     "erl_version",
     "_start",
@@ -268,9 +268,9 @@ struct loosy_t {
     struct erl_record_t * erl;
 };
 
-struct dependancy_t {
+struct dependency_t {
     struct erl_record_t * depender, * provider;
-    struct dependancy_t * next, * prev;
+    struct dependency_t * next, * prev;
 };
 
 
@@ -282,7 +282,7 @@ static htab * loosy_relocs = 0;
 
 char _init_erl_prefix[256] = "";
 
-static struct dependancy_t * dependancy_root = 0;
+static struct dependency_t * dependency_root = 0;
 
 
 static u32 align(u32 x, int align) {
@@ -449,32 +449,32 @@ struct symbol_t * erl_find_symbol(const char * symbol) {
     return r_find_symbol(symbol, erl_record_root);
 }
 
-static struct dependancy_t * add_dependancy(struct erl_record_t * depender, struct erl_record_t * provider) {
-    struct dependancy_t * d;
+static struct dependency_t * add_dependency(struct erl_record_t * depender, struct erl_record_t * provider) {
+    struct dependency_t * d;
 
     if (depender == provider)
 	return 0;
 
-    if (!(d = (struct dependancy_t *) malloc(sizeof(struct dependancy_t))))
+    if (!(d = (struct dependency_t *) malloc(sizeof(struct dependency_t))))
 	return 0;
 
     d->depender = depender;
     d->provider = provider;
 
-    if ((d->next = dependancy_root))
+    if ((d->next = dependency_root))
 	d->next->prev = d;
 
     d->prev = 0;
-    dependancy_root = d;
+    dependency_root = d;
 
     return d;
 }
 
-static void destroy_dependancy(struct dependancy_t * d) {
+static void destroy_dependency(struct dependency_t * d) {
     if (d->prev)
 	d->prev->next = d->next;
     else
-	dependancy_root = d->next;
+	dependency_root = d->next;
 
     if (d->next)
 	d->next->prev = d->prev;
@@ -482,20 +482,20 @@ static void destroy_dependancy(struct dependancy_t * d) {
     free(d);
 }
 
-static void r_destroy_dependancy_r(struct erl_record_t * erl, struct dependancy_t * d) {
+static void r_destroy_dependency_r(struct erl_record_t * erl, struct dependency_t * d) {
     if (!d)
 	return;
 
-    r_destroy_dependancy_r(erl, d->next);
+    r_destroy_dependency_r(erl, d->next);
 
     if (erl == d->depender)
-	destroy_dependancy(d);
+	destroy_dependency(d);
 
     return;
 }
 
-static void destroy_dependancy_r(struct erl_record_t * erl) {
-    r_destroy_dependancy_r(erl, dependancy_root);
+static void destroy_dependency_r(struct erl_record_t * erl) {
+    r_destroy_dependency_r(erl, dependency_root);
 }
 
 static void add_loosy(struct erl_record_t * erl, u8 * reloc, int type, const char * symbol) {
@@ -524,7 +524,7 @@ static int fix_loosy(struct erl_record_t * provider, const char * symbol, u32 ad
     if (hfind(loosy_relocs, symbol, strlen(symbol))) {
 	for (l = hstuff(loosy_relocs); l; l = l->next) {
 	    apply_reloc(l->reloc, l->type, address);
-	    add_dependancy(l->erl, provider);
+	    add_dependency(l->erl, provider);
 	    count++;
 	}
 	r_destroy_loosy(hstuff(loosy_relocs));
@@ -856,7 +856,7 @@ return code
 			dprintf("Something went wrong in relocation.");
 			free_and_return(-1);
 		    }
-		    add_dependancy(erl_record, s->provider);
+		    add_dependency(erl_record, s->provider);
 		}
 		break;
 	    case SECTION:
@@ -876,7 +876,7 @@ return code
 			dprintf("Something went wrong in relocation.");
 			free_and_return(-1);
 		    }
-		    add_dependancy(erl_record, s->provider);
+		    add_dependency(erl_record, s->provider);
 		} else {
     		    dprintf("Relocating at %08X.\n", erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr + sym[sym_n].st_value);
 		    if (apply_reloc(erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, (u32) (erl_record->bytes + sec[sym[sym_n].st_shndx].sh_addr + sym[sym_n].st_value)) < 0) {
@@ -973,18 +973,18 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr
 
     dprintf("erl_id = %08X.\n", r->name);
 
-    if ((s = erl_find_local_symbol("erl_dependancies", r))) {
-	r->dependancies = (char **) s->address;
+    if ((s = erl_find_local_symbol("erl_dependencies", r))) {
+	r->dependencies = (char **) s->address;
     } else {
-	r->dependancies = 0;
+	r->dependencies = 0;
     }
 
-    dprintf("erl_dependancies = %08X.\n", r->dependancies);
+    dprintf("erl_dependencies = %08X.\n", r->dependencies);
 
-    if (r->dependancies) {
+    if (r->dependencies) {
 	char ** d;
-	for (d = r->dependancies; *d; d++) {
-	    dprintf("Loading dependancy: %s.\n", *d);
+	for (d = r->dependencies; *d; d++) {
+	    dprintf("Loading dependency: %s.\n", *d);
 	    _init_load_erl(*d);
 	}
     }
@@ -1072,12 +1072,12 @@ struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 a
     return load_erl_from_file_to_addr(tfname, addr, 1, argv);
 }
 
-void r_unload_dependancies(char ** d) {
+void r_unload_dependencies(char ** d) {
     struct erl_record_t * erl;
     if (!(*d))
 	return;
 
-    r_unload_dependancies(d + 1);
+    r_unload_dependencies(d + 1);
 
     if ((erl = find_erl(*d)))
 	unload_erl(erl);
@@ -1085,7 +1085,7 @@ void r_unload_dependancies(char ** d) {
 
 int unload_erl(struct erl_record_t * erl) {
     struct symbol_t * s;
-    struct dependancy_t * p;
+    struct dependency_t * p;
 
     dprintf("Unloading module %s.\n", erl->name ? erl->name : "(noname)");
 
@@ -1094,7 +1094,7 @@ int unload_erl(struct erl_record_t * erl) {
 	return 0;
     }
 
-    for (p = dependancy_root; p; p = p->next) {
+    for (p = dependency_root; p; p = p->next) {
 	if (p->provider == erl) {
 	    dprintf("Other modules depend on it, won't unload.\n");
 	    return 0;
@@ -1108,12 +1108,12 @@ int unload_erl(struct erl_record_t * erl) {
 #endif
     }
 
-    if (erl->dependancies)
-	r_unload_dependancies(erl->dependancies);
+    if (erl->dependencies)
+	r_unload_dependencies(erl->dependencies);
 
     erl_flush_symbols(erl);
 
-    destroy_dependancy_r(erl);
+    destroy_dependency_r(erl);
 
     destroy_erl_record(erl);
 

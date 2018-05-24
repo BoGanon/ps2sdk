@@ -66,8 +66,8 @@ $(EE_BIN): $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 		-o $(EE_BIN) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(CRTEND_OBJ) $(CRTN_OBJ)
 
-$(EE_ERL): $(EE_OBJS)
-	$(EE_CC) $(EE_NO_CRT) -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
+$(EE_ERL): $(EE_OBJS) $(ERL_OBJS)
+	$(EE_CC) $(EE_NO_CRT) -o $(EE_ERL) $(EE_OBJS) $(ERL_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
 
 $(EE_LIB): $(EE_OBJS)

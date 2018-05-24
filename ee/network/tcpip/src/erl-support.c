@@ -13,7 +13,7 @@
 #include <erl.h>
 
 char * erl_id = "libps2ip141";
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libc",
     "libnetman",
     0

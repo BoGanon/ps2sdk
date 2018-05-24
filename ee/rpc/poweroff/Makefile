@@ -9,7 +9,9 @@
 EE_INCS = -I$(PS2SDKSRC)/ee/rpc/hdd/include \
 	  -I$(PS2SDKSRC)/ee/rpc/filexio/include
 
-EE_OBJS = poweroff.o erl-support.o
+EE_OBJS = poweroff.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

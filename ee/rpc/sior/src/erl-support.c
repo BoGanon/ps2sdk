@@ -14,7 +14,7 @@
 
 char * erl_id = "libsior";
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libkernel",
     "libc",
     0

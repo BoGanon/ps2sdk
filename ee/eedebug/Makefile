@@ -10,7 +10,9 @@ EE_INCS = -I$(PS2SDKSRC)/ee/kernel/src
 
 EE_CFLAGS += -O0
 
-EE_OBJS = ee_debug.o ee_exceptions.o ee_dbg_low.o erl-support.o
+EE_OBJS = ee_debug.o ee_exceptions.o ee_dbg_low.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

@@ -6,7 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS = netman.o rpc_server.o rpc_client.o erl-support.o
+EE_OBJS = netman.o rpc_server.o rpc_client.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

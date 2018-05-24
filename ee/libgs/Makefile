@@ -8,7 +8,9 @@
 
 EE_LIB = libgs.a
 
-EE_OBJS = libgs.o ResetPath.o dma.o DoubleBuff.o draw.o Zbuffer.o lowlevel.o packets.o primitives.o sync.o texture.o erl-support.o
+EE_OBJS = libgs.o ResetPath.o dma.o DoubleBuff.o draw.o Zbuffer.o lowlevel.o packets.o primitives.o sync.o texture.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

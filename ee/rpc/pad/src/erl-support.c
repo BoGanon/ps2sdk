@@ -18,7 +18,7 @@ char * erl_id = "libpadx";
 char * erl_id = "libpad";
 #endif
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libkernel",
     "libc",
     0

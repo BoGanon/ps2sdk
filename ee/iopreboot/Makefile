@@ -9,7 +9,9 @@ IOPCONTROL_SPECIAL_EE_OBJS = _iopcontrol_special_internals.o SifIopRebootBufferE
 IOPCONTROL_SPECIAL_IOP_OBJS = imgdrv_irx.o
 IOPCONTROL_SPECIAL_OBJS = 
 
-EE_OBJS = $(IOPCONTROL_SPECIAL_EE_OBJS) $(IOPCONTROL_SPECIAL_IOP_OBJS) erl-support.o
+EE_OBJS = $(IOPCONTROL_SPECIAL_EE_OBJS) $(IOPCONTROL_SPECIAL_IOP_OBJS)
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

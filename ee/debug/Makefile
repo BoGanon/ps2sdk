@@ -9,7 +9,9 @@
 EE_INCS += -I$(PS2SDKSRC)/ee/graph/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include \
 	   -I$(PS2SDKSRC)/ee/rpc/fileio/include
 
-EE_OBJS = scr_printf.o font.o screenshot.o callstack.o callstackget.o hwbp.o erl-support.o
+EE_OBJS = scr_printf.o font.o screenshot.o callstack.o callstackget.o hwbp.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

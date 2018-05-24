@@ -1277,7 +1277,7 @@ snmp_decode_truthvalue(const s32_t *asn1_value, u8_t *bool_value)
  * @param buf points to a buffer where the resulting ASN1 octet string is stored to
  * @param buf_len max length of the bufffer
  * @param bit_value Bit value to encode with Bit0 == LSB
- * @param bit_count Number of possible bits for the bit value (according to rfc we have to send all bits independant from their truth value)
+ * @param bit_count Number of possible bits for the bit value (according to rfc we have to send all bits independent from their truth value)
  * @return number of bytes used from buffer to store the resulting OctetString
  */
 u8_t

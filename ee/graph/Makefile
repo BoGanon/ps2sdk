@@ -9,7 +9,9 @@
 EE_INCS += -I$(PS2SDKSRC)/ee/dma/include -I$(PS2SDKSRC)/ee/packet/include \
 	   -I$(PS2SDKSRC)/ee/rpc/cdvd/include
 
-EE_OBJS = graph.o graph_mode.o graph_vram.o graph_config.o erl-support.o
+EE_OBJS = graph.o graph_mode.o graph_vram.o graph_config.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

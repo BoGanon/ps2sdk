@@ -14,7 +14,7 @@
 
 char * erl_id = "libps2ip";
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libkernel",
     "libc",
     0

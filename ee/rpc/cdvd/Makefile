@@ -25,7 +25,9 @@ SCMD_OBJS += _scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskTy
 	sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
 	_CdSyncS.o
 
-EE_OBJS = $(LIBCDVD_OBJS) $(NCMD_OBJS) $(SCMD_OBJS) erl-support.o
+EE_OBJS = $(LIBCDVD_OBJS) $(NCMD_OBJS) $(SCMD_OBJS)
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

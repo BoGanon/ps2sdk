@@ -18,7 +18,7 @@ char * erl_id = "libinputx";
 char * erl_id = "libinput";
 #endif
 
-char * erl_dependancies[] = {
+char * erl_dependencies[] = {
     "libc",
 #ifdef _XINPUT
     "libmtap",

@@ -10,7 +10,9 @@ EE_INCS = -I$(PS2SDKSRC)/ee/kernel/src
 
 EE_LIB = libfileXio.a
 
-EE_OBJS = fileXio_rpc.o erl-support.o
+EE_OBJS = fileXio_rpc.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

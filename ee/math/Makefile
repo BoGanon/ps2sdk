@@ -22,7 +22,9 @@ EE_OBJS = acoshf.o airyf.o asinf.o asinhf.o atanf.o \
 	powif.o powf.o psif.o rgammaf.o shichif.o sicif.o \
 	sindgf.o sinf.o sinhf.o spencef.o sqrtf.o stdtrf.o \
 	struvef.o tandgf.o tanf.o tanhf.o ynf.o zetaf.o \
-	zetacf.o polevlf.o setprec.o mtherr.o erl-support.o
+	zetacf.o polevlf.o setprec.o mtherr.o
+
+ERL_OBJS = erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
