@@ -51,6 +51,14 @@ LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o SifLoadModu
 	_SifLoadModuleBuffer.o SifLoadModuleBuffer.o SifLoadStartModuleBuffer.o \
 	SifExecModuleBuffer.o SifExecModuleFile.o
 
+### FILEIO client objects
+
+FILEIO_OBJS = __fio_internals.o fio_init.o _fio_intr.o fio_sync.o fio_setblockmode.o \
+	fio_exit.o fio_open.o fio_close.o fio_read.o \
+	fio_write.o fio_lseek.o fio_mkdir.o _fio_read_intr.o fio_getc.o fio_putc.o \
+	fio_ioctl.o fio_dopen.o fio_dclose.o fio_dread.o fio_getstat.o fio_chstat.o \
+	fio_remove.o fio_format.o fio_rmdir.o fio_gets.o
+
 ### IOPHEAP client objects
 
 IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
@@ -171,11 +179,14 @@ $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifcmd.c
 $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifrpc.c
 	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
+$(FILEIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileio.c
+	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
+
 $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)loadfile.c
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/fileio/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
+	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
 $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/fileio/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@
 
 $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(@:$(EE_OBJS_DIR)%.o=%) $< -c -o $@

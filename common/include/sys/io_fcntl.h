@@ -45,8 +45,6 @@
 #define IO_SEEK_END	2
 /** @} */
 
-
-
 /** End of addtogroup fio_stat
  *  @}
  */

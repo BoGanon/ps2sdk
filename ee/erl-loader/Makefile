@@ -18,8 +18,8 @@ EE_CFLAGS += $(NO_BUILTIN:%=-fno-builtin-%)
 EE_INCS += -I$(PS2SDKSRC)/ee/erl/include \
 	   -I$(PS2SDKSRC)/ee/erl-loader/src
 
-EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a \
-	   $(PS2SDKSRC)/ee/rpc/fileio/lib/libfileio.a -lc -lm \
+EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a -lc -lm \
+	   $(PS2SDKSRC)/ee/rpc/filexio/lib/libfileXio.a \
 	   $(PS2SDKSRC)/ee/kernel/lib/libkernel.a
 
 EE_OBJS = erl-loader.o

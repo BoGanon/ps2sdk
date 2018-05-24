@@ -10,7 +10,6 @@ SUBDIRS = ahx
 SUBDIRS += camera
 SUBDIRS += cdvd
 SUBDIRS += xcdvd
-SUBDIRS += fileio
 SUBDIRS += filexio
 SUBDIRS += hdd
 SUBDIRS += keyboard
