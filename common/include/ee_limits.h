@@ -72,11 +72,11 @@
 /* Minimum and maximum values a `signed long int' can hold.
    (Same as `int').  */
 #ifndef __LONG_MAX__
-#ifdef __R5900
+#ifdef _R5900
 #define __LONG_MAX__ 9223372036854775807L
 #else
 #define __LONG_MAX__ 2147483647L
-#endif /* __R5900 */
+#endif /* _R5900 */
 #endif
 #undef LONG_MIN
 #define LONG_MIN (-LONG_MAX-1)
