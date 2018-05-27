@@ -40,7 +40,7 @@ EE_C_COMPILE := $(EE_CC) $(EE_CFLAGS)
 EE_CXX_COMPILE := $(EE_CXX) $(EE_CXXFLAGS)
 
 # Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
-EE_CC_VERSION := $(shell $(EE_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
+EE_CC_VERSION := $(shell $(EE_CC) -dumpversion)
 
 ifdef EE_CC_VERSION
 	ifeq ($(EE_CC_VERSION),3.2.2)

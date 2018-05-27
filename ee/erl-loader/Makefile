@@ -42,10 +42,10 @@ $(EE_OBJS_DIR)erl-loader.o: | $(EE_OBJS_DIR)
 
 $(LOADER_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
 	$(EE_C_COMPILE) -c $(EE_SRC_DIR)dummy-exports.c -o $(EE_OBJS_DIR)dummy-exports.o
-	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	$(EE_CC) -nodefaultlibs $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)dummy-exports.o $(EE_LIBS) -lgcc
 	$(EE_SRC_DIR)build-exports.sh
 	rm $(EE_BIN_DIR)tmp.elf
 	$(EE_C_COMPILE) -c $(EE_SRC_DIR)exports.c -o $(EE_OBJS_DIR)exports.o
-	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	$(EE_CC) -nodefaultlibs $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
 	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_OBJS_DIR)exports.o $(EE_LIBS) -lgcc
