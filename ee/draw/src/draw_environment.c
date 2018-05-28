@@ -1,7 +1,7 @@
 #include <tamtypes.h>
 
-#include <gif_tags.h>
-#include <gs_gp.h>
+#include <gif.h>
+#include <gs.h>
 
 #include <draw.h>
 

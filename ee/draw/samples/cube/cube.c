@@ -17,8 +17,8 @@
 #include <packet.h>
 
 #include <dma_tags.h>
-#include <gif_tags.h>
-#include <gs_psm.h>
+#include <gif.h>
+#include <gs.h>
 
 #include <dma.h>
 

@@ -18,9 +18,8 @@
 #include "libmpeg.h"
 
 #include <dma_tags.h>
-#include <gif_tags.h>
-#include <gs_psm.h>
-#include <gs_gp.h>
+#include <gif.h>
+#include <gs.h>
 
 #include <kernel.h>
 #include <dma.h>

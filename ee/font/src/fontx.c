@@ -4,8 +4,8 @@
 #include <draw.h>
 #include <draw3d.h>
 
-#include <gif_tags.h>
-#include <gs_gp.h>
+#include <gif.h>
+#include <gs.h>
 
 #include <stdio.h>
 #include <stdlib.h>

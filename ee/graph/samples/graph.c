@@ -12,10 +12,9 @@
 #include <tamtypes.h>
 #include <stdio.h>
 
-#include <gif_tags.h>
+#include <gif.h>
 
-#include <gs_gp.h>
-#include <gs_psm.h>
+#include <gs.h>
 
 #include <dma.h>
 #include <dma_tags.h>

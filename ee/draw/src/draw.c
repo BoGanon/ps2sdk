@@ -1,10 +1,7 @@
 #include <dma_tags.h>
-#include <gif_tags.h>
+#include <gif.h>
 
-#include <gs_privileged.h>
-#include <gs_gp.h>
-#include <gs_psm.h>
-
+#include <gs.h>
 #include <draw.h>
 #include <draw2d.h>
 

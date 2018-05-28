@@ -1,4 +1,4 @@
-#include <gs_psm.h>
+#include <gs.h>
 
 #include <graph_vram.h>
 

@@ -4,9 +4,9 @@
 #include <draw2d.h>
 #include <draw3d.h>
 
-#include <gif_tags.h>
+#include <gif.h>
 
-#include <gs_gp.h>
+#include <gs.h>
 
 // Normal offset
 #define OFFSET 2048.0f

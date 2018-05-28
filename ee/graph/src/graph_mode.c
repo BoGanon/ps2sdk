@@ -2,7 +2,7 @@
 #include <kernel.h>
 #include <osd_config.h>
 
-#include <gs_privileged.h>
+#include <gs.h>
 
 #include <graph.h>
 #include <graph_config.h>

@@ -1,5 +1,5 @@
 #include <kernel.h>
-#include <gs_privileged.h>
+#include <gs.h>
 
 #include <graph.h>
 

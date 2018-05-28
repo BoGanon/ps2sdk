@@ -10,7 +10,6 @@
 
 #include <draw_primitives.h>
 #include <draw_types.h>
-#include <gif_tags.h>
 
 /** Register lists */
 #define DRAW_XYZ_REGLIST \

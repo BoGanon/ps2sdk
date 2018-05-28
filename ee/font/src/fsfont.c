@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gif.h>
+
 #include <draw.h>
 #include <draw3d.h>
 
