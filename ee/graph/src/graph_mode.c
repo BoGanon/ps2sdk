@@ -5,7 +5,6 @@
 #include <gs.h>
 
 #include <graph.h>
-#include <graph_config.h>
 
 /* y offset is non-interlaced */
 GRAPH_MODE graph_mode[22] =

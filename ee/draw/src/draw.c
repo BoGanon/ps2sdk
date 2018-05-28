@@ -3,7 +3,6 @@
 
 #include <gs.h>
 #include <draw.h>
-#include <draw2d.h>
 
 qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, zbuffer_t *z)
 {

@@ -1,6 +1,6 @@
 #include <gs.h>
 
-#include <graph_vram.h>
+#include <graph.h>
 
 static int graph_vram_pointer = 0;
 

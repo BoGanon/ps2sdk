@@ -2,7 +2,6 @@
 #include <fileio.h>
 
 #include <draw.h>
-#include <draw3d.h>
 
 #include <gif.h>
 #include <gs.h>

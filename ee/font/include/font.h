@@ -6,9 +6,6 @@
 #ifndef __FONT_H__
 #define __FONT_H__
 
-#include <draw.h>
-#include <tamtypes.h>
-
 /**
      * FontX2
          * Fontx2 fonts can be single byte JISCII but can also have double byte

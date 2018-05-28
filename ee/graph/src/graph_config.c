@@ -2,7 +2,6 @@
 #include <string.h>
 
 #include <graph.h>
-#include <graph_config.h>
 
 #include <errno.h>
 

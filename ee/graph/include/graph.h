@@ -6,8 +6,6 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
-#include <graph_vram.h>
-
 // Sets screen mode
 /** Automatic NTSC or PAL mode setting. */
 #define GRAPH_MODE_AUTO         0
@@ -86,6 +84,15 @@
 #define GRAPH_BLEND_RC2          0
 #define GRAPH_BLEND_BGCOLOR      1
 
+/** Each word is 1 32-bit pixel */
+#define GRAPH_VRAM_MAX_WORDS 1048576
+
+/** Frame Buffer and Z Buffer */
+#define GRAPH_ALIGN_PAGE     2048
+
+/** Texture Buffer and CLUT Buffer */
+#define GRAPH_ALIGN_BLOCK    64
+
 typedef struct {
 	int x,y;
 	int width, height;
@@ -97,6 +104,35 @@ extern GRAPH_MODE graph_mode[];
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** Creates a string from the current mode.
+ * The string format is: mode:int:ffmd:filter:x:y:
+ */
+int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flicker_filter, char *config);
+
+/** Gets the string made from the current mode. */
+int graph_get_config(char *config);
+
+/** Sets the mode from the configuration string. */
+int graph_set_config(char *config);
+
+/** Reads the configuration string from a file and sets it. */
+int graph_load_config(char *filename);
+
+/** Writes the current mode information into a config file as a string. */
+int graph_save_config(char *filename);
+
+/** Allocates vram and returns vram base pointer */
+int graph_vram_allocate(int width, int height, int psm, int alignment);
+
+/** Frees in FIFO order... */
+void graph_vram_free(int address);
+
+/** Clears the vram status */
+void graph_vram_clear(void);
+
+/** Calculate the size in vram of a texture or buffer */
+int graph_vram_size(int width, int height, int psm, int alignment);
 
 /** Initializes a default NTSC/PAL mode with default settings. */
 int graph_initialize(int fbp, int width, int height, int psm, int x, int y);

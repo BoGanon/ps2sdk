@@ -1,8 +1,6 @@
 #include <floatlib.h>
 
 #include <draw.h>
-#include <draw2d.h>
-#include <draw3d.h>
 
 #include <gif.h>
 
