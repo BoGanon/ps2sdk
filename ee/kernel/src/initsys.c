@@ -12,6 +12,7 @@
  * initsys - basic initialization/termination functions for libkernel.
  */
 
+#include <stddef.h>
 #include "kernel.h"
 
 #if defined(F__InitSys) || defined(DOXYGEN)

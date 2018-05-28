@@ -17,8 +17,6 @@
 #ifndef __KERNEL_H__
 #define __KERNEL_H__
 
-#include <stddef.h>
-#include <stdarg.h>
 #include <sifdma.h>
 
 /** @addtogroup interrupt Interrupts
