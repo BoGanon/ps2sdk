@@ -7,10 +7,10 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = graph.elf
-EE_OBJS = graph.o
-EE_LIBS = -lpacket -ldma -lgraph -ldraw -lc -lmf
+EE_LIBS = -lpacket -ldma -lgraph -ldraw -lmf
 
-all: $(EE_BIN)
+all: graph.c
+	$(EE_CC) -o $(EE_BIN) graph.c $(EE_LIBS)
 	$(EE_STRIP) --strip-all $(EE_BIN)
 
 clean:
@@ -23,4 +23,3 @@ reset:
 	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
