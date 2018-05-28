@@ -12,8 +12,8 @@ EE_INC_DIR ?= include/
 EE_SAMPLE_DIR ?= samples/
 
 EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) \
-	  -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include \
-	  -I$(PS2SDKSRC)/ee/erl/include
+	  -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/include \
+	  -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/erl/include
 
 # C compiler flags
 EE_CFLAGS := -D_EE -G0 -O2 -Wall $(EE_INCS) $(EE_CFLAGS)

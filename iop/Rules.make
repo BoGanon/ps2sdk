@@ -21,7 +21,9 @@ ASFLAGS_TARGET = -march=r3000
 endif
 
 # include dir
-IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include
+IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include \
+	-I$(IOP_INC_DIR) -I$(PS2SDKSRC)/iop/kernel/include \
+	-I$(PS2SDKSRC)/iop/include -I$(PS2SDKSRC)/common/include
 
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
