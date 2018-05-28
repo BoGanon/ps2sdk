@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+# Externally defined variables: EE_BIN, EE_ERL, EE_OBJS, EE_LIB
+
 # Include directories
 EE_INCS := -I. $(EE_INCS)
 
