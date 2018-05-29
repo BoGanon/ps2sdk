@@ -22,7 +22,7 @@ release-dirs:
 
 release-bin:
 	 @if test $(TOOLS_BIN) ; then \
-	    $(ECHO) Installing $(TOOLS_BIN) to $(PS2SDK) ; \
+	    $(ECHO) Installing $(TOOLS_BIN) to $(PS2SDK)/bin ; \
 	    cp -f $(TOOLS_BIN) $(RELEASE_TOOLS_DIRS) ; \
 	 fi;
 

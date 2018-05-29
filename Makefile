@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+export SHELL:=/bin/bash
+
 ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC := $(shell pwd)
 endif

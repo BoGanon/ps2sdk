@@ -13,7 +13,6 @@ all:
 clean:
 
 release: release-samples
-	@$(ECHO) Released samples dir.
 
 release-samples:
 	$(MKDIR) -p $(SAMPLES_TARGET)

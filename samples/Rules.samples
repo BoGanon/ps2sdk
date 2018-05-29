@@ -31,7 +31,7 @@ clean:
 release: sample-dir
 	@for file in *; do \
 	   if [ $$file = "Makefile" ] ; then \
-	      $(ECHO) Skipping Makefile. ; \
+	      : ;\
 	   elif [ $$file = "Makefile.sample" ] ; then \
 	      $(ECHO) Installing $$file to $(TARGET)/Makefile ; \
 	      cp -f $$file $(TARGET)/Makefile ; \
@@ -45,7 +45,6 @@ release: sample-dir
 	      cp -fr $$file $(TARGET) ; \
 	   fi ; \
 	done
-	@$(ECHO) Released: $(SAMPLE_DIR)
 
 
 #

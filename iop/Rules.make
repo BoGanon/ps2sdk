@@ -6,18 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_CC_VERSION := $(shell $(IOP_CC) -dumpversion)
+IOP_OLD_VERSION := $(shell $(IOP_CC) --version | grep '3.2.3' &> /dev/null; echo $$?)
+ifneq ($(IOP_OLD_VERSION),0)
+IOP_OLD_VERSION := $(shell $(IOP_CC) --version | grep '3.2.2' &> /dev/null; echo $$?)
+endif
 
 IOP_OBJS_DIR ?= obj/
 IOP_SRC_DIR ?= src/
 IOP_INC_DIR ?= include/
 
-ifeq ($(IOP_CC_VERSION),3.2.2)
-ASFLAGS_TARGET = -march=r3000
-endif
-
-ifeq ($(IOP_CC_VERSION),3.2.3)
-ASFLAGS_TARGET = -march=r3000
+ifeq ($(IOP_OLD_VERSION),0)
+ASFLAGS_TARGET := -march=r3000
 endif
 
 # include dir
@@ -39,11 +38,9 @@ IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 #   output multiple LO relocs after one HI reloc (which the IOP kernel cannot deal with).
 # -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
 #   Without it, the import and export tables can be broken apart by GCC's optimizations.
-ifneq ($(IOP_CC_VERSION),3.2.2)
-ifneq ($(IOP_CC_VERSION),3.2.3)
-IOP_CFLAGS += -msoft-float -mno-explicit-relocs
+ifneq ($(IOP_OLD_VERSION),0)
+IOP_CFLAGS := $(IOP_CFLAGS) -msoft-float -mno-explicit-relocs
 IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
-endif
 endif
 
 # Assembler flags
@@ -58,6 +55,7 @@ IOP_C_COMPILE = $(IOP_CC) $(IOP_CFLAGS)
 
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.c
 	$(IOP_C_COMPILE) -c $< -o $@
+
 
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.S
 	$(IOP_C_COMPILE) -c $< -o $@

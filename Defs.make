@@ -15,13 +15,14 @@
 #
 
 EE_TOOL_PREFIX ?= ee-
-EE_CC = $(EE_TOOL_PREFIX)gcc
-EE_CXX = $(EE_TOOL_PREFIX)g++
-EE_AS = $(EE_TOOL_PREFIX)as
-EE_LD = $(EE_TOOL_PREFIX)ld
-EE_AR = $(EE_TOOL_PREFIX)ar
-EE_OBJCOPY = $(EE_TOOL_PREFIX)objcopy
-EE_STRIP = $(EE_TOOL_PREFIX)strip
+EE_TOOL_PREFIX := $(EE_TOOL_PREFIX)
+EE_CC := $(EE_TOOL_PREFIX)gcc
+EE_CXX := $(EE_TOOL_PREFIX)g++
+EE_AS := $(EE_TOOL_PREFIX)as
+EE_LD := $(EE_TOOL_PREFIX)ld
+EE_AR := $(EE_TOOL_PREFIX)ar
+EE_OBJCOPY := $(EE_TOOL_PREFIX)objcopy
+EE_STRIP := $(EE_TOOL_PREFIX)strip
 
 
 #
@@ -29,40 +30,43 @@ EE_STRIP = $(EE_TOOL_PREFIX)strip
 #
 
 IOP_TOOL_PREFIX ?= iop-
-IOP_CC = $(IOP_TOOL_PREFIX)gcc
-IOP_AS = $(IOP_TOOL_PREFIX)as
-IOP_LD = $(IOP_TOOL_PREFIX)ld
-IOP_AR = $(IOP_TOOL_PREFIX)ar
-IOP_OBJCOPY = $(IOP_TOOL_PREFIX)objcopy
-IOP_STRIP = $(IOP_TOOL_PREFIX)strip
+IOP_TOOL_PREFIX := $(IOP_TOOL_PREFIX)
+IOP_CC := $(IOP_TOOL_PREFIX)gcc
+IOP_AS := $(IOP_TOOL_PREFIX)as
+IOP_LD := $(IOP_TOOL_PREFIX)ld
+IOP_AR := $(IOP_TOOL_PREFIX)ar
+IOP_OBJCOPY := $(IOP_TOOL_PREFIX)objcopy
+IOP_STRIP := $(IOP_TOOL_PREFIX)strip
 
 #
 # Definitions for the local toolchain
 #
 
-CC = gcc
-AS = as
-LD = ld
-AR = ar
-OBJCOPY = objcopy
-STRIP = strip
+CC := gcc
+AS := as
+LD := ld
+AR := ar
+OBJCOPY := objcopy
+STRIP := strip
 
 #
 # Definitions for local shell operations
 #
 
-MKDIR = mkdir
-RMDIR = rmdir
-ECHO  = echo
-LN = ln
+MKDIR := mkdir
+RMDIR := rmdir
+ECHO  := echo
+LN := ln
 
-SYSTEM = $(shell uname)
+export SHELL := /bin/bash
+SYSTEM := $(shell uname)
+
 
 ifeq ($(findstring Windows, $(SYSTEM)), Windows)
   # these versions are used for the cygwin toolchain in a dos environment
   # since they need to overwrite the standard dos versions of each command
-  MKDIR = cyg-mkdir
-  RMDIR = cyg-rmdir
-  ECHO  = cyg-echo
+  MKDIR := cyg-mkdir
+  RMDIR := cyg-rmdir
+  ECHO  := cyg-echo
 endif
 
