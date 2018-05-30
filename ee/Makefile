@@ -26,6 +26,7 @@ SUBDIRS += font
 SUBDIRS += input
 SUBDIRS += inputx
 SUBDIRS += network
+SUBDIRS += iopreboot
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
