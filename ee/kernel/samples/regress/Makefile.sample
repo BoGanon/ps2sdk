@@ -6,14 +6,30 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_BIN   = ps2tests.elf
-EE_OBJS  = runner.o testsuite.o
+EE_BIN  = ps2tests.elf
+EE_OBJS = runner.o testsuite.o
 EE_OBJS += stdio_tests.o
 
-all: $(EE_BIN)
+# make EE_CC=gcc will compile a native version of the regression test.
+# ./ps2tests.elf to compare output.
+ifneq ($(EE_CC),gcc)
+EE_LIBS = -lpatches
+endif
+
+all: $(EE_OBJS) fileXio.irx iomanX.irx testfiles
+	$(EE_CC) -Wall -o $(EE_BIN) $(EE_OBJS) $(EE_LIBS)
+
+%.o: %.c
+	$(EE_CC) -Wall -c $< -o $@
+
+fileXio.irx:
+	cp $(PS2SDK)/iop/irx/fileXio.irx $@
+
+iomanX.irx:
+	cp $(PS2SDK)/iop/irx/iomanX.irx $@
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS)
+	rm -f $(EE_BIN) $(EE_OBJS) fileXio.irx iomanX.irx
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)
@@ -22,4 +38,3 @@ reset:
 	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

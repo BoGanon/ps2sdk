@@ -10,7 +10,7 @@ EE_BIN = graph.elf
 EE_LIBS = -lpacket -ldma -lgraph -ldraw -lmf
 
 all: graph.c
-	$(EE_CC) -o $(EE_BIN) graph.c $(EE_LIBS)
+	$(EE_CC) -Wall -o $(EE_BIN) graph.c $(EE_LIBS)
 	$(EE_STRIP) --strip-all $(EE_BIN)
 
 clean:

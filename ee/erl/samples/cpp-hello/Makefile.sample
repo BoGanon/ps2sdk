@@ -7,12 +7,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_ERL = cpp-hello.erl
-ERL_CFLAGS = -nostdlib
 ERL_LDFLAGS = -Wl,-r -Wl,-d
 ERL_DEPS = libc.erl libfileXio.erl libkernel.erl
 
 all: cpp-hello.cc erl-loader.elf $(ERL_DEPS)
-	$(EE_CXX) $(ERL_CFLAGS) -o $(EE_ERL) cpp-hello.cc $(ERL_LDFLAGS)
+	$(EE_CXX) -nostdlib -Wall -o $(EE_ERL) cpp-hello.cc $(ERL_LDFLAGS)
 
 clean:
 	rm -f $(EE_ERL) erl-loader.elf libc.a libc-erl.o $(ERL_DEPS)
@@ -22,8 +21,8 @@ erl-loader.elf:
 
 libc.erl: $(PS2DEV)/ee/ee/lib/libc.a libc-erl.c
 	cp $(PS2DEV)/ee/ee/lib/libc.a libc.a
-	$(EE_CC) -c libc-erl.c -o libc-erl.o
-	$(EE_LD) $(ERL_CFLAGS) -o libc.erl libc-erl.o --whole-archive libc.a --no-whole-archive -r -d
+	$(EE_CC) -Wall -c libc-erl.c -o libc-erl.o
+	$(EE_LD) -nostdlib -o libc.erl libc-erl.o --whole-archive libc.a --no-whole-archive -r -d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment libc.erl
 
 libfileXio.erl:

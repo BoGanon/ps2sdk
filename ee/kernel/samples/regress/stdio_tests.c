@@ -1,27 +1,31 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <time.h>
 
-#include <testsuite.h>
+#include "testsuite.h"
 
-static const char *test_init(void *arg)
+static const char *test_fopen_fclose(void *arg)
 {
-  char cwd[256];
-  if (getcwd(cwd, 256)[0] == '\0')
-    chdir("host:");
+  FILE *fp = fopen((char *)arg, "rt");
+  if (fp == NULL)
+  {
+    return "failed to open test file";
+  }
 
-  if (strcmp(getcwd(cwd, 256),"host:"))
-    return "failed to setup cwd";
-
+  fclose(fp);
   return NULL;
 }
 
 static const char *test_fgets(void *arg)
 {
   char buf[64], *ret;
+
   FILE *fp = fopen((char *)arg, "rt");
+
   if (fp == NULL)
   {
     return "failed to open test file";
@@ -35,18 +39,6 @@ static const char *test_fgets(void *arg)
     return "read wrong data from file";
   }
 
-  return NULL;
-}
-
-static const char *test_fopen_fclose(void *arg)
-{
-  FILE *fp = fopen((char *)arg, "rt");
-  if (fp == NULL)
-  {
-    return "failed to open test file";
-  }
-
-  fclose(fp);
   return NULL;
 }
 
@@ -158,7 +150,8 @@ static const char *test_fseek_ftell(void *arg)
     goto failed;
   }
 
-  /* seek to end of file, "hello world" = 12 bytes */
+  /* seek to end of file 
+     "hello world" = 12 bytes */
   ret = fseek(fp, 0, SEEK_END);
   off = ftell(fp);
   if (ret != 0 || off != 12)
@@ -271,16 +264,20 @@ static const char *test_fwrite(void *arg)
 }
 
 /* These do not work via host: on ps2client.
-   The hostfs protocol doesn't implement stat(). */
+   The hostfs protocol does not implement stat(). */
 static const char *test_stat_file(void *arg)
 {
   struct stat st;
 
   stat((const char *)arg, &st);
-  printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, (int)st.st_size);
+
+  printf("fn %s mode %o, size %d\n time %s\n",
+       (char *)arg, st.st_mode, (int)st.st_size,
+        ctime(&st.st_mtime));
+
   if (S_ISDIR(st.st_mode))
   {
-    return "expected file, not a directory";
+    return "expected file, not a directory (ignore if using host:)";
   }
 
   return 0;
@@ -291,10 +288,13 @@ static const char *test_stat_dir(void *arg)
   struct stat st;
 
   stat((const char *)arg, &st);
-  printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, (int)st.st_size);
+  printf("fn %s mode %o, size %d\n time %s\n",
+       (char *)arg, st.st_mode, (int)st.st_size,
+        ctime(&st.st_mtime));
+
   if (S_ISDIR(st.st_mode) == 0)
   {
-    return "expected directory, not regular file";
+    return "expected directory, not regular file (ignore if using host:)";
   }
 
   return 0;
@@ -335,6 +335,30 @@ static const char *test_opendir_closedir(void *arg)
   return NULL;
 }
 
+static inline int __udelay(unsigned int usecs)
+{
+ 
+  register unsigned int loops_total = 0;
+  register unsigned int loops_end   = usecs * 148;
+
+  if (usecs > loops_end)
+    return -1;
+
+  __asm__ volatile (".set\tnoreorder\n\t"
+		    "0:\n\t"
+		    "beq\t%0,%2,0f\n\t"
+		    "addiu\t%0,1\n\t"
+		    "bne\t%0,%2,0b\n\t"
+		    "addiu\t%0,1\n\t"
+		    "0:\n\t"
+		    ".set\treorder\n\t"
+		    :"=r" (loops_total)
+		    :"0" (loops_total), "r" (loops_end));
+
+  return 0;
+
+}
+
 static const char *test_readdir_rewinddir(void *arg)
 {
   int i = 0;
@@ -351,9 +375,10 @@ static const char *test_readdir_rewinddir(void *arg)
       closedir(dd);
       return "bad dirent returned";
     }
+    printf("entry[%d] = %s\n",i,de->d_name);
     if (!strlen(de->d_name)) {
       closedir(dd);
-      return "empty dirent returned";
+      return "empty dirent returned (ignore if using host:)";
     }
     i++;
   }
@@ -365,6 +390,7 @@ static const char *test_readdir_rewinddir(void *arg)
       closedir(dd);
       return "bad dirent returned after rewind";
     }
+    printf("entry[%d] = %s\n",j,de->d_name);
     if (!strlen(de->d_name)) {
       closedir(dd);
       return "empty dirent returned after rewind";
@@ -396,11 +422,14 @@ int libc_add_tests(test_suite *p)
 #else
   textfile = "testfiles/dummy";
   textfile2 = "testfiles/dummy2";
-  dir = "textfiles/";
+  dir = "testfiles/";
   dir2 = "dummydir";
 #endif
 
-  add_test(p, "init", test_init, NULL);
+  /* If testing using usbd/usbhdfsd or ps2hdd/ps2fs, this adds a 10
+     second delay so that the devices can initialize fully. */
+  //__udelay(10000000);
+
   add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
   add_test(p, "fgets", test_fgets, (void *)textfile);
   add_test(p, "fread", test_fread, (void *)textfile);
@@ -416,4 +445,3 @@ int libc_add_tests(test_suite *p)
 
   return 0;
 }
-

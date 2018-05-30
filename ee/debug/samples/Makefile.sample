@@ -10,7 +10,7 @@ EE_BIN = callstacktest.elf
 EE_LIBS = -ldebug 
 
 all: callstacktest.c
-	$(EE_CC) -o $(EE_BIN) callstacktest.c $(EE_LIBS)
+	$(EE_CC) -Wall -o $(EE_BIN) callstacktest.c $(EE_LIBS)
 
 clean:
 	rm -f $(EE_BIN)

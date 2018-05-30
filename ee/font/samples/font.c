@@ -7,7 +7,7 @@
 
 #include <packet.h>
 #include <graph.h>
-#include <gs_psm.h>
+#include <gs.h>
 #include <draw.h>
 #include <kernel.h>
 

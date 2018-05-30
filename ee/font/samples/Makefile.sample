@@ -10,7 +10,7 @@ EE_BIN = font.elf
 EE_LIBS = -lfont -lpacket -ldma -lgraph -ldraw -lmf
 
 all: font.c impress.c
-	$(EE_CC) -o $(EE_BIN) font.c impress.c $(EE_LIBS)
+	$(EE_CC) -Wall -o $(EE_BIN) font.c impress.c $(EE_LIBS)
 	$(EE_STRIP) --strip-all $(EE_BIN)
 
 clean:
