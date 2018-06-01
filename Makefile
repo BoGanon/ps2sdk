@@ -52,10 +52,10 @@ subdirs: dummy $(subdir_list)
 
 $(subdir_clean): dummy
 	$(MAKE) -C $(patsubst clean-%,%,$@) clean
-	$(MAKE) -C ee/erl-loader clean
+
 $(subdir_release): dummy
 	$(MAKE) -C $(patsubst release-%,%,$@) release
-	$(MAKE) -C ee/erl-loader release
+
 
 # Build rules
 tools: env_build_check
@@ -81,6 +81,7 @@ rebuild: env_build_check $(subdir_clean) build
 
 # Clean rules
 clean: env_build_check $(subdir_clean)
+	$(MAKE) -C ee/erl-loader clean
 
 # Release rules
 install: release
@@ -111,6 +112,7 @@ release-clean: env_release_check
 	rm -f $(PS2SDK)/ID
 
 release: env_release_check build release-clean release_base release_ports_dir $(subdir_release)
+	$(MAKE) -C ee/erl-loader release
 	@$(ECHO) .;
 	@$(ECHO) .PS2SDK Installed.;
 	@$(ECHO) .;
