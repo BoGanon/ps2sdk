@@ -909,3 +909,105 @@ int mcReset(void)
 	return 0;
 }
 
+struct charmap_t {
+	unsigned short sjis;
+	unsigned char ascii;
+};
+
+/* What was the original encoding?
+   Assuming ISO-8859-1 or ISO-8859-15. */
+struct charmap_t sjis_conversion[] = {
+    { 0x4081, 0x20 }, // ' '
+    { 0x6d81, 0x5B }, // '['
+    { 0x6e81, 0x5D }, // ']'
+    { 0x7c81, 0x2D }, // '-'
+    { 0x5b81, 0xB0 }, // '°'
+    { 0x4581, 0xA5 }, // '¥'
+    { 0x4481, 0x2E }, // '.'
+    { 0x7B81, 0x2B }, // '+'
+    { 0x9681, 0x2A }, // '*'
+    { 0x5E81, 0x2F }, // '/'
+    { 0x4981, 0x21 }, // '!'
+    { 0x6881, 0x22 }, // '"'
+    { 0x9481, 0x23 }, // '#'
+    { 0x9081, 0x24 }, // '$'
+    { 0x9381, 0x25 }, // '%'
+    { 0x9581, 0x26 }, // '&'
+    { 0x6681, 0x27 }, // '''
+    { 0x6981, 0x28 }, // '('
+    { 0x6a81, 0x29 }, // ')'
+    { 0x8181, 0x3D }, // '='
+    { 0x6281, 0x7C }, // '|'
+    { 0x8f81, 0x5C }, // '\'
+    { 0x4881, 0x3F }, // '?'
+    { 0x5181, 0x5F }, // '_'
+    { 0x6f81, 0x7B }, // '{'
+    { 0x7081, 0x7D }, // '}'
+    { 0x9781, 0x40 }, // '@'
+    { 0x4781, 0x3B }, // ';'
+    { 0x4681, 0x3A }, // ':'
+    { 0x8381, 0x3C }, // '<'
+    { 0x8481, 0x3E }, // '>'
+    { 0x4d81, 0x60 }, // '`'
+    { 0, 0 }
+};
+
+unsigned char isSpecialSJIS(short sjis)
+{
+    struct charmap_t *s = &sjis_conversion[0];
+    do {
+	if (s->sjis == sjis) return s->ascii;
+ 	s++;
+    } while (s->sjis != 0);
+    return 0;
+}
+
+short isSpecialASCII(unsigned char ascii)
+{
+    struct charmap_t *s = &sjis_conversion[0];
+    do {
+	if (s->ascii == ascii) return s->sjis;
+ 	s++;
+    } while (s->ascii != 0);
+    return 0;
+}
+
+int strcpy_ascii(char* ascii_buff, const short* sjis_buff)
+{
+    int i;
+    short ascii, sjis;
+
+    int len = strlen((const char *)sjis_buff)/2;
+
+    for (i=0;i<len;i++) {
+	sjis = sjis_buff[i];
+	if ((ascii = isSpecialSJIS(sjis)) != 0) {
+	} else {
+	    ascii = ((sjis & 0xFF00) >> 8) - 0x1f;
+	    if (ascii>96) ascii--;
+	}
+	ascii_buff[i] = ascii;
+    }
+    ascii_buff[i]=0;
+    return len;
+}
+
+int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
+{
+    int i;
+    short ascii, sjis;
+
+    int len = strlen(ascii_buff);
+
+    for (i=0;i<len;i++)	{
+	ascii = ascii_buff[i];
+	if ((sjis = isSpecialASCII(ascii)) != 0) {
+	} else {
+	    if (ascii>96) ascii++;
+	    sjis = ((ascii + 0x1f) << 8) | 0x82;
+	}
+        sjis_buff[i] = sjis;
+    }
+    sjis_buff[i]=0;
+    return len;
+}

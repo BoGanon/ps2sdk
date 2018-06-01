@@ -492,6 +492,18 @@ int mcSync(int mode, int *cmd, int *result);
  */
 int mcReset(void);
 
+/** Convert an Shift-JIS string to ASCII
+ *
+ * @return len = length of string
+ */
+int strcpy_ascii(char* ascii_buff, const short* sjis_buff);
+
+/** Convert a ASCII string to Shift-JIS
+ *
+ * @return len = length of string
+ */
+int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
+
 #ifdef __cplusplus
 }
 #endif

@@ -35,7 +35,7 @@ void LoadModules(void);
 int CreateSave(void);
 
 #define ARRAY_ENTRIES	64
-static mcTable mcDir[ARRAY_ENTRIES] __attribute__((aligned(64)));
+static sceMcTblGetDir mcDir[ARRAY_ENTRIES] __attribute__((aligned(64)));
 static int mc_Type, mc_Free, mc_Format;
 
 int main() {
@@ -107,10 +107,10 @@ int main() {
 
 	for(i=0; i < ret; i++)
 	{
-		if(mcDir[i].attrFile & MC_ATTR_SUBDIR)
-			printf("[DIR] %s\n", mcDir[i].name);
+		if(mcDir[i].AttrFile & MC_ATTR_SUBDIR)
+			printf("[DIR] %s\n", mcDir[i].EntryName);
 		else
-			printf("%s - %d bytes\n", mcDir[i].name, mcDir[i].fileSizeByte);
+			printf("%s - %d bytes\n", mcDir[i].EntryName, mcDir[i].FileSizeByte);
 	}
 
 	// Check if existing save is present
@@ -134,10 +134,10 @@ int main() {
 
 		for(i=0; i < ret; i++)
 		{
-			if(mcDir[i].attrFile & MC_ATTR_SUBDIR)
-				printf("[DIR] %s\n", mcDir[i].name);
+			if(mcDir[i].AttrFile & MC_ATTR_SUBDIR)
+				printf("[DIR] %s\n", mcDir[i].EntryName);
 			else
-				printf("%s - %d bytes\n", mcDir[i].name, mcDir[i].fileSizeByte);
+				printf("%s - %d bytes\n", mcDir[i].EntryName, mcDir[i].FileSizeByte);
 		}
 	}
 
