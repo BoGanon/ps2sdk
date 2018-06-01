@@ -7,13 +7,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = poweroff_example.elf
-EE_OBJS = poweroff.o
 EE_LIBS = -lpoweroff
 
-all: $(EE_BIN) poweroff.irx
+all: poweroff.c poweroff.irx
+	$(EE_CC) -Wall -o $(EE_BIN) poweroff.c $(EE_LIBS)
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) poweroff.irx
+	rm -f $(EE_BIN) poweroff.irx
 
 poweroff.irx: $(PS2SDK)/iop/irx/poweroff.irx
 	cp $< $@
@@ -25,4 +25,3 @@ reset:
 	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

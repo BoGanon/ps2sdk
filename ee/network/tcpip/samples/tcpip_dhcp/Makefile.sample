@@ -7,13 +7,14 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = tcpip_dhcp_example.elf
-EE_OBJS = ps2ip.o DEV9_irx.o NETMAN_irx.o SMAP_irx.o
+IRX_SRC = DEV9_irx.c NETMAN_irx.c SMAP_irx.c
 EE_LIBS = -lnetman -lps2ip -ldebug -lpatches
 
-all: $(EE_BIN)
+all: ps2ip.c $(IRX_SRC)
+	$(EE_CC) -std=c99 -Wall -o $(EE_BIN) ps2ip.c $(IRX_SRC) $(EE_LIBS)
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) DEV9_irx.c NETMAN_irx.c SMAP_irx.c
+	rm -f $(EE_BIN) $(IRX_SRC)
 
 DEV9_irx.c: $(PS2SDK)/iop/irx/ps2dev9.irx
 	bin2c $< DEV9_irx.c DEV9_irx
@@ -31,4 +32,3 @@ reset:
 	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

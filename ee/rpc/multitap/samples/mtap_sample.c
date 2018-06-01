@@ -18,7 +18,7 @@
 #include <malloc.h>
 #include <string.h>
 
-#include "gs_privileged.h"
+#include "gs.h"
 #include "libpad.h"
 #include "libmtap.h"
 

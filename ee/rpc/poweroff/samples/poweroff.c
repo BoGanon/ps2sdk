@@ -14,6 +14,7 @@
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "libpwroff.h"
 

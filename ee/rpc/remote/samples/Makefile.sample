@@ -7,13 +7,14 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = remote.elf
-EE_OBJS = remote.o SIO2MAN_irx.o RMMAN_irx.o
+IRX_SRC = SIO2MAN_irx.c RMMAN_irx.c
 EE_LIBS = -ldebug -lrm -lpatches
 
-all: $(EE_BIN)
+all: remote.c $(IRX_SRC)
+	$(EE_CC) -Wall -o $(EE_BIN) remote.c $(IRX_SRC) $(EE_LIBS)
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) SIO2MAN_irx.c RMMAN_irx.c
+	rm -f $(EE_BIN) $(IRX_SRC)
 
 SIO2MAN_irx.c:
 	bin2c $(PS2SDK)/iop/irx/rsio2man.irx SIO2MAN_irx.c SIO2MAN_irx
@@ -22,4 +23,3 @@ RMMAN_irx.c:
 	bin2c $(PS2SDK)/iop/irx/rmman.irx RMMAN_irx.c RMMAN_irx
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

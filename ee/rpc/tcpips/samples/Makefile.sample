@@ -7,16 +7,16 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = ee-echo.elf
-EE_OBJS = echo.o
-EE_LIBS = -lps2ips -lc
+EE_LIBS = -lps2ips
 
-all: $(EE_BIN) ps2ips.irx
+all: echo.c ps2ips.irx
+	$(EE_CC) -std=c99 -Wall -o $(EE_BIN) echo.c $(EE_LIBS)
 
 ps2ips.irx:
 	cp $(PS2SDK)/iop/irx/ps2ips.irx $@
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) ps2ips.irx
+	rm -f $(EE_BIN) ps2ips.irx
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)
@@ -25,4 +25,3 @@ reset:
 	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

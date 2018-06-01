@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <sifrpc.h>
-#include <gs_privileged.h>
+#include <gs.h>
 #include <libpad.h>
 #include <string.h>
 
