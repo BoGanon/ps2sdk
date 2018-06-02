@@ -17,7 +17,6 @@
 #include <gs.h>
 
 #include <dma.h>
-#include <dma_tags.h>
 
 #include <draw.h>
 #include <graph.h>

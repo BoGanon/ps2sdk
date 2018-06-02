@@ -13,8 +13,6 @@
 #include <dma.h>
 #include <kernel.h>
 
-#include <dma_registers.h>
-
 // Channel Control
 static u32 dma_chcr[10] = { 0x10008000, 0x10009000, 0x1000A000, 0x1000B000, 0x1000B400, 0x1000C000, 0x1000C400, 0x1000C800, 0x1000D000, 0x1000D400 };
 // Quadword Count

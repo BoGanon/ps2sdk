@@ -16,11 +16,9 @@
 
 #include <packet.h>
 
-#include <dma_tags.h>
+#include <dma.h>
 #include <gif.h>
 #include <gs.h>
-
-#include <dma.h>
 
 #include <graph.h>
 

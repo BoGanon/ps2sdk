@@ -1,4 +1,4 @@
-#include <dma_tags.h>
+#include <dma.h>
 #include <gif.h>
 
 #include <gs.h>

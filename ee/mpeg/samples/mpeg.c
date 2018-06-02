@@ -17,12 +17,11 @@
 */
 #include "libmpeg.h"
 
-#include <dma_tags.h>
+#include <dma.h>
 #include <gif.h>
 #include <gs.h>
 
 #include <kernel.h>
-#include <dma.h>
 #include <draw.h>
 #include <fileio.h>
 #include <malloc.h>
