@@ -15,7 +15,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <loadfile.h>
-#include <fileXio.h>
+#include <fileXio_rpc.h>
 
 #include <stdio.h>
 #include <sio.h>
@@ -45,7 +45,7 @@ void iop_start(void)
 int main()
 {
   if (iop_ret < 0)
-    return;
+    return 0;
 /*
   init_scr();
   scr_printf("Hello, world!\n"); // hello world in the screen
