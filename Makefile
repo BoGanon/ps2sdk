@@ -98,6 +98,7 @@ release_base: release_base_dir
 	cp -f AUTHORS $(PS2SDK)
 	cp -f LICENSE.md $(PS2SDK)
 	cp -f ID $(PS2SDK)
+	cp -f Defs.make $(PS2SDK)
 
 release-clean: env_release_check
 	$(MAKE) -C common release-clean
@@ -110,6 +111,7 @@ release-clean: env_release_check
 	rm -f $(PS2SDK)/AUTHORS
 	rm -f $(PS2SDK)/LICENSE.md
 	rm -f $(PS2SDK)/ID
+	rm -f $(PS2SDK)/Defs.make
 
 release: env_release_check build release-clean release_base release_ports_dir $(subdir_release)
 	$(MAKE) -C ee/erl-loader release
